@@ -221,7 +221,7 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
     (save-some-buffers t)))
 
 (defun org-onit--setup ()
-  "Setup `org-onit-mode'."
+  "Setup."
   (advice-add 'org-clock-goto :around #'org-onit--clock-goto)
   (add-hook 'org-after-todo-state-change-hook #'org-onit--remove-tag-not-todo)
   (add-hook 'kill-emacs-hook #'org-onit-clock-out-when-kill-emacs)
@@ -229,7 +229,7 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
   (add-hook 'org-clock-out-hook #'org-onit--remove-tag))
 
 (defun org-onit--abort ()
-  "Cleanup `org-onit-mode'."
+  "Cleanup."
   (when (and (org-clocking-p)
              (not org-clock-persist))
     (org-clock-out))
