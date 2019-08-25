@@ -272,7 +272,8 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
            (remove-hook 'post-command-hook #'org-onit--post-action)
            (when (org-clocking-p)
              (org-clock-out))
-           (run-hooks 'org-onit-stop-autoclock-hook)))))
+           (run-hooks 'org-onit-stop-autoclock-hook)))
+    (redraw-modeline)))
 
 ;;;###autoload
 (defun org-onit-toggle-doing ()
