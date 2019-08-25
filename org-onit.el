@@ -4,7 +4,7 @@
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 0.9.0
+;; Version: 0.9.1
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -70,8 +70,13 @@
   :type 'string
   :group 'org-onit)
 
-(defcustom org-onit-bookmark "org-clock-last-clock-in"
-  "Bookmark for org-onit."
+(defcustom org-onit-bookmark "org-onit-last-clock-in"
+  "Bookmark for last clock in heading."
+  :type 'string
+  :group 'org-onit)
+
+(defcustom org-onit-bookmark-anchor "org-onit-anchor"
+  "Bookmark to store anchor position."
   :type 'string
   :group 'org-onit)
 
@@ -195,22 +200,27 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
 
 (defun org-onit--clock-goto (f &optional select)
   "Go to the current clocking task.  Even after restart of Emacs, try to restore the current task from `bookmark'.  F is the original `org-clock-goto'.  SELECT is the optional argument of `org-clock-goto'."
-  (let ((bm (bookmark-get-bookmark org-onit-bookmark 'noerror)))
-    (cond
-     ((and (require 'org-bookmark-heading nil t) ;; most reliable
-           bm)
-      (bookmark-jump org-onit-bookmark) ;; call org-bookmark-jump
-      (org-show-entry)
-      (show-children))
-     (org-clock-history
-      (apply f select)
-      (show-children))
-     (bm
-      (bookmark-jump org-onit-bookmark) ;; use normal bookmark
-      (org-back-to-heading t)
-      (org-show-entry)
-      (show-children))
-     (t (message "No clock is found to be shown")))))
+  (if (bookmark-get-bookmark org-onit-bookmark-anchor 'noerror)
+      (progn
+        (bookmark-jump org-onit-bookmark-anchor)
+        (bookmark-delete org-onit-bookmark-anchor))
+    (let ((bm (bookmark-get-bookmark org-onit-bookmark 'noerror)))
+      (bookmark-set org-onit-bookmark-anchor)
+      (cond
+       ((and (require 'org-bookmark-heading nil t) ;; most reliable
+             bm)
+        (bookmark-jump org-onit-bookmark) ;; call org-bookmark-jump
+        (org-show-entry)
+        (show-children))
+       (org-clock-history
+        (apply f select)
+        (show-children))
+       (bm
+        (bookmark-jump org-onit-bookmark) ;; use normal bookmark
+        (org-back-to-heading t)
+        (org-show-entry)
+        (show-children))
+       (t (message "No clock is found to be shown"))))))
 
 (defun org-onit-clock-out-when-kill-emacs ()
   "Save buffers and stop clocking when killing Emacs."

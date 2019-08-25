@@ -37,7 +37,7 @@ It is recommended to install [[https://github.com/alphapapa/org-bookmark-heading
   (setq org-clock-clocked-in-display 'frame-title) ;; or 'both
   (setq org-clock-frame-title-format
         '((:eval (format "%s|%s| %s"
-                         (if org-onit--auto-clocking "Auto -" "")
+                         (if org-onit--auto-clocking "Auto " "")
                          (org-onit-get-sign)
                          org-mode-line-string)))))
 #+end_src
@@ -45,7 +45,7 @@ It is recommended to install [[https://github.com/alphapapa/org-bookmark-heading
 * How to use
 ** Manual approach
 
-If you apply the above recommended keybindings, then just type =<f11>= in an org buffer. A tag of a heading having the cursor will be changed to =Doing= and automatically start to =org-clock-in=. You can go any buffers and do anything but you can go back to the =Doing= tagged heading by just typing =C-<f11>=. Typing =<f11>= again, then =org-clock-out= is executed and =Doing= tag will disappear.
+If you apply the above recommended keybindings, then just type =<f11>= in an org buffer. A tag of a heading having the cursor will be changed to =Doing= and automatically start to =org-clock-in=. You can go any buffers and do anything but you can go back to the =Doing= tagged heading by just typing =C-<f11>=. Typing =<f11>= again, then =org-clock-out= is executed and =Doing= tag will disappear. When you type =C-<f11>= again, you can go back to the original position your are jumped from.
 
 ** Automated approach
 
