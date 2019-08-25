@@ -291,11 +291,14 @@ This command also switches `org-clock-in' and `org-clock-out'."
             (org-clock-out))
           (org-toggle-tag org-onit-tag 'off))
          (t
-          (when (and org-onit-wakeup-done
-                     (org-entry-is-done-p))
-            (org-todo org-onit-todo-state))
-          (org-clock-in)
-          (org-toggle-tag org-onit-tag 'on)))))
+          (if (org-entry-is-done-p)
+              (if (not org-onit-wakeup-done)
+                  (message "Prevent `org-clock-in' and switching to TODO.")
+                (org-todo org-onit-todo-state)
+                (org-clock-in)
+                (org-toggle-tag org-onit-tag 'on))
+            (org-clock-in)
+            (org-toggle-tag org-onit-tag 'on))))))
     (org-cycle-hide-drawers 'children)
     (org-reveal)))
 
