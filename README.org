@@ -1,3 +1,67 @@
 #+title: org-onit
 
-Drafting...
+* Install
+
+Please put ~org-onit.el~ into your =load-path=.
+
+If you use ~package.el~ or other package manager, no necessary to add =(require 'org-onit)= to your ~init.el~ and just call toggle commands =org-onit-toggle-doing= or =org-onit-toggle-auto= in an org buffer.
+
+** Additional package
+
+It is recommended to install [[https://github.com/alphapapa/org-bookmark-heading][org-bookmark-heading]] because a normal jump by built-in ~bookmark.el~ is not sufficiently accurate for org buffers. [[https://github.com/alphapapa/org-bookmark-heading][org-bookmark-heading]] provides more precise jumping capability by adding ID property to each org mode heading. ~org-onit.el~ will use [[https://github.com/alphapapa/org-bookmark-heading][org-bookmark-heading]] if available but not mandatory.
+
+* Recommend settings
+
+** Highly recommended
+#+begin_src emacs-lisp
+(with-eval-after-load "org-clock"
+  (setq org-clock-out-remove-zero-time-clocks t))
+#+end_src
+
+** Recommended keybindings
+
+#+begin_src emacs-lisp
+(with-eval-after-load "org"
+  (define-key org-mode-map (kbd "<f11>") 'org-onit-toggle-doing)
+  (define-key org-mode-map (kbd "M-<f11>") 'org-onit-toggle-auto)
+  (global-set-key (kbd "C-<f11>") 'org-clock-goto))
+#+end_src
+
+** Optional settings
+
+#+begin_src emacs-lisp
+(with-eval-after-load "org"
+  (setq org-tag-faces '(("Doing" :foreground "#FF0000"))))
+
+(with-eval-after-load "org-clock"
+  (setq org-clock-clocked-in-display 'frame-title) ;; or 'both
+  (setq org-clock-frame-title-format
+        '((:eval (format "%s|%s| %s"
+                         (if org-onit--auto-clocking "Auto -" "")
+                         (org-onit-get-sign)
+                         org-mode-line-string)))))
+#+end_src
+
+* How to use
+** Manual approach
+
+If you apply the above recommended keybindings, then just type =<f11>= in an org buffer. A tag of a heading having the cursor will be changed to =Doing= and automatically start to =org-clock-in=. You can go any buffers and do anything but you can go back to the =Doing= tagged heading by just typing =C-<f11>=. Typing =<f11>= again, then =org-clock-out= is executed and =Doing= tag will disappear.
+
+** Automated approach
+
+Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will be done automatically no need to toggle =Doing= tag by yourself.
+
+** Options
+ - org-onit-wakeup-done
+   - Allow switching to =org-clock-in= by =org-onit-toggle-doing= when the heading is DONE.
+   - Default: nil
+ - org-onit-include-no-status-heading
+   - Allow switching to =org-clock-in= in any headings except headings in TODO when =org-onit-toggle-auto= is used.
+   - Default: nil
+ - org-onit-encure-clock-out-when-exit
+   - Call =org-clock-out= when killing Emacs.
+   - Default: t
+** Hooks
+ - org-onit-switch-task-hook
+ - org-onit-start-autoclock-hook
+ - org-onit-stop-autoclock-hook
