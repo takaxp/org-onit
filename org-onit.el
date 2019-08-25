@@ -4,7 +4,7 @@
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 0.9.1
+;; Version: 0.9.2
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -127,6 +127,7 @@ This flag is utilized for `org-onit-toggle-auto'."
 (defvar org-onit--auto-clocking nil)
 (defvar org-onit--heading nil)
 (defvar org-onit--status nil)
+(defvar org-onit--org-bookmark-heading-p (require 'org-bookmark-heading nil t))
 
 (defun org-onit--switched-p ()
   "Return t if the current heading was changed."
@@ -198,32 +199,37 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
     (org-cycle-hide-drawers 'children)
     (org-reveal)))
 
+(defun org-onit--bookmark-jump (bookmark)
+  "Jump to BOOKMARK."
+  (bookmark-jump bookmark)
+  (when (eq major-mode 'org-mode)
+    (unless org-onit--org-bookmark-heading-p
+      (org-back-to-heading t))
+    (org-show-entry)
+    (show-children)))
+
 (defun org-onit--clock-goto (f &optional select)
-  "Go to the current clocking task.  Even after restart of Emacs, try to restore the current task from `bookmark'.  F is the original `org-clock-goto'.  SELECT is the optional argument of `org-clock-goto'."
-  (if (bookmark-get-bookmark org-onit-bookmark-anchor 'noerror)
-      (progn
-        (bookmark-jump org-onit-bookmark-anchor)
-        (bookmark-delete org-onit-bookmark-anchor))
-    (let ((bm (bookmark-get-bookmark org-onit-bookmark 'noerror)))
-      (bookmark-set org-onit-bookmark-anchor)
-      (cond
-       ((and (require 'org-bookmark-heading nil t) ;; most reliable
-             bm)
-        (bookmark-jump org-onit-bookmark) ;; call org-bookmark-jump
-        (org-show-entry)
-        (show-children))
-       (org-clock-history
-        (apply f select)
-        (show-children))
-       (bm
-        (bookmark-jump org-onit-bookmark) ;; use normal bookmark
-        (org-back-to-heading t)
-        (org-show-entry)
-        (show-children))
-       (t (message "No clock is found to be shown"))))))
+"Go to the current clocking task.  Even after restart of Emacs, try to restore the current task from `bookmark'.  F is the original `org-clock-goto'.  SELECT is the optional argument of `org-clock-goto'."
+(if (bookmark-get-bookmark org-onit-bookmark-anchor 'noerror)
+    (progn
+      (org-onit--bookmark-jump org-onit-bookmark-anchor)
+      (bookmark-delete org-onit-bookmark-anchor))
+  (let ((bm (bookmark-get-bookmark org-onit-bookmark 'noerror)))
+    (bookmark-set org-onit-bookmark-anchor)
+    (cond
+     ((and org-onit--org-bookmark-heading-p ;; most reliable
+           bm)
+      (org-onit--bookmark-jump org-onit-bookmark)) ;; call org-bookmark-jump
+     (org-clock-history
+      (apply f select)
+      (show-children))
+     (bm
+      (org-onit--bookmark-jump org-onit-bookmark)) ;; use normal bookmark
+     (t (message "No clock is found to be shown"))))))
 
 (defun org-onit-clock-out-when-kill-emacs ()
   "Save buffers and stop clocking when killing Emacs."
+  (bookmark-delete org-onit-bookmark-anchor)
   (when (and org-onit-encure-clock-out-when-exit
              (org-clocking-p)
              (not org-clock-persist))
@@ -243,6 +249,7 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
   (when (and (org-clocking-p)
              (not org-clock-persist))
     (org-clock-out))
+  (bookmark-delete org-onit-bookmark-anchor)
   (advice-remove 'org-clock-goto #'org-onit--clock-goto)
   (remove-hook 'org-after-todo-state-change-hook
                #'org-onit--remove-tag-not-todo)
