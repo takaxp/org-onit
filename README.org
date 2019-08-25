@@ -1,4 +1,8 @@
-#+title: org-onit
+#+title: org-onit.el
+
+* Introduction
+
+This package provides automated ~org-clock-in~ and ~org-clock-out~ by adding ~Doing~ tag to a heading of an org mode buffer. While the ~Doing~ tag appeared in an org buffer, Emacs Org mode maintains the task clocking. You can say "I'm on it!".
 
 * Install
 
