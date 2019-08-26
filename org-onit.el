@@ -245,7 +245,7 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
   (bookmark-delete org-onit-bookmark-anchor)
   (when (and org-onit-encure-clock-out-when-exit
              (org-clocking-p)
-             (not org-clock-persist))
+             (memq org-clock-persist '(history nil)))
     (org-clock-out)
     (save-some-buffers t)))
 
@@ -260,7 +260,7 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
 (defun org-onit--abort ()
   "Cleanup."
   (when (and (org-clocking-p)
-             (not org-clock-persist))
+             (memq org-clock-persist '(history nil)))
     (org-clock-out))
   (bookmark-delete org-onit-bookmark-anchor)
   (setq org-onit--clock-in-last-pos nil)
