@@ -4,7 +4,7 @@
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 0.9.2
+;; Version: 0.9.3
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -32,7 +32,7 @@
 ;;  2. Toggle to activate auto clocking of the current org heading.
 ;;
 ;; Install:
-;;  - Get org-onit.el from Github.
+;;  - Get org-onit.el from GitHub.
 ;;
 ;; Setup:
 ;;  - After installing this package, you will be able to call interactively
@@ -43,9 +43,10 @@
 ;; Keybindings:
 ;;  - No default keybindings are configured.
 ;;  - Assigning following keybindings are recommended:
+;;    (global-set-key (kbd \"C-<f11>\") 'org-clock-goto)
 ;;    (define-key org-mode-map (kbd \"<f11>\") 'org-onit-toggle-doing)
 ;;    (define-key org-mode-map (kbd \"M-<f11>\") 'org-onit-toggle-auto)
-;;    (global-set-key (kbd \"C-<f11>\") 'org-clock-goto)
+;;    (define-key org-mode-map (kbd \"S-<f11>\") 'org-onit-goto-anchor)
 ;;
 
 ;;; Change Log:
@@ -109,6 +110,11 @@ This flag is utilized for `org-onit-toggle-auto'."
   :type 'hook
   :group 'org-onit)
 
+(defcustom org-onit-after-jump-hook nil
+  "Hook runs after jumping to a bookmark."
+  :type 'hook
+  :group 'org-onit)
+
 (defcustom org-onit-clocking-sign-alist
   '("▁" "▂" "▃" "▄" "▅" "▆" "▇" "▇" "▇" "▆" "▅" "▄" "▃" "▂" "▁" "▁" "▁")
   "List of signs to show a clock is active."
@@ -128,6 +134,8 @@ This flag is utilized for `org-onit-toggle-auto'."
 (defvar org-onit--heading nil)
 (defvar org-onit--status nil)
 (defvar org-onit--org-bookmark-heading-p (require 'org-bookmark-heading nil t))
+(defvar org-onit--clock-in-last-pos nil)
+(defvar org-onit--anchor-last-pos nil)
 
 (defun org-onit--switched-p ()
   "Return t if the current heading was changed."
@@ -171,7 +179,11 @@ This flag is utilized for `org-onit-toggle-auto'."
   (save-excursion
     (save-restriction
       (org-back-to-heading t)
-      (bookmark-set org-onit-bookmark))))
+      (setq org-onit--clock-in-last-pos (point))
+      (bookmark-set org-onit-bookmark)
+      (when (bookmark-get-bookmark org-onit-bookmark-anchor 'noerror)
+        (setq org-onit--anchor-last-pos nil)
+        (bookmark-delete org-onit-bookmark-anchor)))))
 
 (defun org-onit--remove-tag ()
   "Remove `org-onit-tag' tag from the current heading."
@@ -205,17 +217,18 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
   (when (eq major-mode 'org-mode)
     (unless org-onit--org-bookmark-heading-p
       (org-back-to-heading t))
-    (org-show-entry)
-    (show-children)))
+    (run-hooks 'org-onit-after-jump-hook)))
 
 (defun org-onit--clock-goto (f &optional select)
-"Go to the current clocking task.  Even after restart of Emacs, try to restore the current task from `bookmark'.  F is the original `org-clock-goto'.  SELECT is the optional argument of `org-clock-goto'."
-(if (bookmark-get-bookmark org-onit-bookmark-anchor 'noerror)
-    (progn
-      (org-onit--bookmark-jump org-onit-bookmark-anchor)
-      (bookmark-delete org-onit-bookmark-anchor))
+  "Go to the current clocking task.  Even after restart of Emacs, try to restore the current task from `bookmark'.  F is the original `org-clock-goto'.  SELECT is the optional argument of `org-clock-goto'."
   (let ((bm (bookmark-get-bookmark org-onit-bookmark 'noerror)))
-    (bookmark-set org-onit-bookmark-anchor)
+    (if (eq (point) org-onit--clock-in-last-pos)
+        (message "Already at the last clocked in.")
+      (bookmark-set org-onit-bookmark-anchor)
+      (when (eq major-mode 'org-mode)
+        (org-back-to-heading t))
+      (setq org-onit--anchor-last-pos (point))
+      (message "Anchor bookmark was recorded."))
     (cond
      ((and org-onit--org-bookmark-heading-p ;; most reliable
            bm)
@@ -225,7 +238,7 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
       (show-children))
      (bm
       (org-onit--bookmark-jump org-onit-bookmark)) ;; use normal bookmark
-     (t (message "No clock is found to be shown"))))))
+     (t (message "No clock is found to be shown")))))
 
 (defun org-onit-clock-out-when-kill-emacs ()
   "Save buffers and stop clocking when killing Emacs."
@@ -250,6 +263,8 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
              (not org-clock-persist))
     (org-clock-out))
   (bookmark-delete org-onit-bookmark-anchor)
+  (setq org-onit--clock-in-last-pos nil)
+  (setq org-onit--anchor-last-pos nil)
   (advice-remove 'org-clock-goto #'org-onit--clock-goto)
   (remove-hook 'org-after-todo-state-change-hook
                #'org-onit--remove-tag-not-todo)
@@ -263,6 +278,17 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
   org-onit--lighter)
 
 ;; public functions
+
+(defun org-onit-goto-anchor ()
+  "Go to the anchor position if recorded."
+  (interactive)
+  (if (bookmark-get-bookmark org-onit-bookmark-anchor 'noerror)
+      (progn
+        (if (eq (point) org-onit--anchor-last-pos)
+            (message "Already at the anchor.")
+          (message "Jumped to the anchor."))
+        (org-onit--bookmark-jump org-onit-bookmark-anchor))
+    (message "No anchor is recorded.")))
 
 (defun org-onit-get-sign ()
   "Return the first item of `org-onit-clocking-sign-alist'."
@@ -348,6 +374,7 @@ Recommended keybindings:
   (global-set-key (kbd \"C-<f11>\") 'org-clock-goto)
   (define-key org-mode-map (kbd \"<f11>\") 'org-onit-toggle-doing)
   (define-key org-mode-map (kbd \"M-<f11>\") 'org-onit-toggle-auto)
+  (define-key org-mode-map (kbd \"S-<f11>\") 'org-onit-goto-anchor)
 "
   :init-value nil
   :lighter (:eval (org-onit--lighter))

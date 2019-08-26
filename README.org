@@ -30,6 +30,7 @@ It is recommended to install [[https://github.com/alphapapa/org-bookmark-heading
 (with-eval-after-load "org"
   (define-key org-mode-map (kbd "<f11>") 'org-onit-toggle-doing)
   (define-key org-mode-map (kbd "M-<f11>") 'org-onit-toggle-auto)
+  (define-key org-mode-map (kbd "S-<f11>") 'org-onit-goto-anchor)
   (global-set-key (kbd "C-<f11>") 'org-clock-goto))
 #+end_src
 
@@ -51,7 +52,7 @@ It is recommended to install [[https://github.com/alphapapa/org-bookmark-heading
 * How to use
 ** Manual approach
 
-If you apply the above recommended keybindings, then just type =<f11>= in an org buffer. A tag of a heading having the cursor will be changed to =Doing= and automatically start to =org-clock-in=. You can go any buffers and do anything but you can go back to the =Doing= tagged heading by just typing =C-<f11>=. Typing =<f11>= again, then =org-clock-out= is executed and =Doing= tag will disappear. When you type =C-<f11>= again, you can go back to the original position you are jumped from.
+If you apply the above recommended keybindings, then just type =<f11>= in an org buffer. A tag of a heading having the cursor will be changed to =Doing= and automatically start to =org-clock-in=. You can go any buffers and do anything but you can go back to the =Doing= tagged heading by just typing =C-<f11>=. Typing =<f11>= again, then =org-clock-out= is executed and =Doing= tag will disappear. When you type =S-<f11>=, you can go back to the original position you are jumped from.
 
 ** Automated approach
 
@@ -67,7 +68,16 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
  - org-onit-encure-clock-out-when-exit
    - Call =org-clock-out= when killing Emacs.
    - Default: t
+
 ** Hooks
  - org-onit-switch-task-hook
  - org-onit-start-autoclock-hook
  - org-onit-stop-autoclock-hook
+ - org-onit-after-jump-hook
+   #+begin_src emacs-lisp
+   (defun my-org-reveal ()
+     (org-reveal)
+     (org-show-entry)
+     (show-children))
+   (add-hook 'org-onit-after-jump-hook #'my-org-reveal)
+   #+end_src
