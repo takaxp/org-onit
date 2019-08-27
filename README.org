@@ -6,6 +6,9 @@ This package provides automated ~org-clock-in~ and ~org-clock-out~ by adding ~Do
 
 You can say "I'm on it!".
 
+#+CAPTION: Workflow with org-onit-toggle-doing, org-clock-into, and org-onit-goto-anchor
+[[https://github.com/takaxp/contents/blob/master/org-onit/org-onit-toggle-doing.png]]
+
 * Install
 
 Please put ~org-onit.el~ into your =load-path=.
