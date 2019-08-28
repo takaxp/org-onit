@@ -57,19 +57,54 @@ It is recommended to install [[https://github.com/alphapapa/org-bookmark-heading
 
 If you apply the above recommended keybindings, then just type =<f11>= in an org buffer. A tag of a heading having the cursor will be changed to =Doing= and automatically start to =org-clock-in=. You can go any buffers and do anything but you can go back to the =Doing= tagged heading by just typing =C-<f11>=. Typing =<f11>= again, then =org-clock-out= is executed and =Doing= tag will disappear. When you type =S-<f11>=, you can go back to the original position you are jumped from.
 
+*** clock-in and clock-out triggers
+
+**** clock-in triggers
+
+=org-clock-in= will be called when:
+
+- calling =org-onit-toggle-doing= if the task is not ~DONE~
+- calling =org-onit-toggle-doing= at any headings if =org-onit-wakeup-done= is non-nil
+
+**** clock-out triggers
+
+=org-clock-out= will be called when:
+
+- calling =org-onit-toggle-doing=
+- making the task ~DONE~
+
 ** Automated approach
 
 Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will be done automatically no need to toggle =Doing= tag by yourself.
+
+*** clock-in and clock-out triggers
+
+**** clock-in triggers
+
+=org-clock-in= will be called when:
+
+- visiting a heading if the task is not ~DONE~
+- visiting a heading if =org-onit-include-no-status-heading= is non-nil and the task is not ~DONE~
+- making the task not ~DONE~
+
+**** clock-out triggers
+
+=org-clock-out= will be called when:
+
+- switching to other headings if the task has a todo status (e.g. ~TODO~)
+- switching to other headings if =org-onit-include-no-status-heading= is non-nil and the task is not ~DONE~
+- making the task ~DONE~
+- calling =org-onit-toggle-doing=
 
 ** Options
  - org-onit-wakeup-done
    - Allow switching to =org-clock-in= by =org-onit-toggle-doing= when the heading is DONE.
    - Default: nil
  - org-onit-include-no-status-heading
-   - Allow switching to =org-clock-in= in any headings except headings in TODO when =org-onit-toggle-auto= is used.
+   - Allow switching to =org-clock-in= in any headings except headings in TODO when =org-onit-toggle-auto= is used
    - Default: nil
  - org-onit-encure-clock-out-when-exit
-   - Call =org-clock-out= when killing Emacs.
+   - Call =org-clock-out= when killing Emacs if =org-clock-persis= is not ='history= or =nil=
    - Default: t
 
 ** Hooks
