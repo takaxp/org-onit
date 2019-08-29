@@ -65,6 +65,7 @@ If you apply the above recommended keybindings, then just type =<f11>= in an org
 
 - calling =org-onit-toggle-doing= if the task is not ~DONE~
 - calling =org-onit-toggle-doing= at any headings if =org-onit-wakeup-done= is non-nil
+- unfolding a heading if =org-onit-use-unfold-as-doing= is non-nil
 
 **** clock-out triggers
 
@@ -106,6 +107,9 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
  - org-onit-encure-clock-out-when-exit
    - Call =org-clock-out= when killing Emacs if =org-clock-persis= is not ='history= or =nil=
    - Default: t
+ - org-onit-use-unfold-as-doing
+   - Call =org-clock-in= when a heading is unfold and not clocking.
+   - Default: nil
 
 ** Hooks
  - org-onit-switch-task-hook
