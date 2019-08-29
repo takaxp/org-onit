@@ -4,7 +4,7 @@
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 0.9.3
+;; Version: 0.9.4
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -266,6 +266,8 @@ STATE should be one of the symbols listed in the docstring of
   (when (and org-onit-use-unfold-as-doing
              (not (org-clocking-p))
              (memq state '(children subtree)))
+    (unless org-onit-mode
+      (org-onit-mode 1))
     (org-onit--post-action t)))
 
 (defun org-onit--setup ()
