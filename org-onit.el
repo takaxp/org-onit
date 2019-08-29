@@ -97,7 +97,7 @@ This flag is utilized for `org-onit-toggle-auto'."
 
 (defcustom org-onit-use-unfold-as-doing nil
   "If non-nil, clock-in when a heading is unfold and not clocking."
-  :type boolean
+  :type 'boolean
   :group 'org-onit)
 
 (defcustom org-onit-switch-task-hook nil
@@ -259,11 +259,13 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
     (org-clock-out)
     (save-some-buffers t)))
 
-(defun org-onit--clock-in-when-unfolded (status)
-  "Clock-in when a heading is switched to unfold and not clocking."
+(defun org-onit--clock-in-when-unfolded (state)
+  "Clock-in when a heading is switched to unfold and not clocking.
+STATE should be one of the symbols listed in the docstring of
+`org-cycle-hook'."
   (when (and org-onit-use-unfold-as-doing
              (not (org-clocking-p))
-             (memq status '(children subtree)))
+             (memq state '(children subtree)))
     (org-onit--post-action t)))
 
 (defun org-onit--setup ()
