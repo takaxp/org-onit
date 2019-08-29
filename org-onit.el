@@ -233,12 +233,13 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
         (message "Already at the last clocked in.")
       (when (bookmark-get-bookmark org-onit-bookmark-anchor 'noerror)
         (bookmark-delete org-onit-bookmark-anchor))
-      (bookmark-set org-onit-bookmark-anchor)
+      (if (ignore-errors (bookmark-set org-onit-bookmark-anchor))
+          (message "Anchor bookmark was recorded in a file.")
+        (message "Anchor bookmark was not recorded for the buffer."))
       (when (and (eq major-mode 'org-mode)
                  (not (org-before-first-heading-p)))
         (org-back-to-heading t))
-      (setq org-onit--anchor-last-pos (point))
-      (message "Anchor bookmark was recorded."))
+      (setq org-onit--anchor-last-pos (point)))
     (cond
      ((and org-onit--org-bookmark-heading-p ;; most reliable
            bm)
