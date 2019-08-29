@@ -95,6 +95,11 @@ This flag is utilized for `org-onit-toggle-auto'."
 (defcustom org-onit-encure-clock-out-when-exit t
   "If non-nil, `org-clock-out' will be called when killing Emacs.")
 
+(defcustom org-onit-use-unfold-as-doing nil
+  "If non-nil, clock-in when a heading is unfold and not clocking."
+  :type boolean
+  :group 'org-onit)
+
 (defcustom org-onit-switch-task-hook nil
   "Hook runs after activating new clock in auto clocking."
   :type 'hook
@@ -254,9 +259,17 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
     (org-clock-out)
     (save-some-buffers t)))
 
+(defun org-onit--clock-in-when-unfolded (status)
+  "Clock-in when a heading is switched to unfold and not clocking."
+  (when (and org-onit-use-unfold-as-doing
+             (not (org-clocking-p))
+             (memq status '(children subtree)))
+    (org-onit--post-action t)))
+
 (defun org-onit--setup ()
   "Setup."
   (advice-add 'org-clock-goto :around #'org-onit--clock-goto)
+  (add-hook 'org-cycle-hook #'org-onit--clock-in-when-unfolded)
   (add-hook 'org-after-todo-state-change-hook #'org-onit--remove-tag-not-todo)
   (add-hook 'kill-emacs-hook #'org-onit-clock-out-when-kill-emacs)
   (add-hook 'org-clock-in-hook #'org-onit--bookmark-set)
@@ -271,6 +284,7 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
   (setq org-onit--clock-in-last-pos nil)
   (setq org-onit--anchor-last-pos nil)
   (advice-remove 'org-clock-goto #'org-onit--clock-goto)
+  (remove-hook 'org-cycle-hook #'org-onit--clock-in-when-unfolded)
   (remove-hook 'org-after-todo-state-change-hook
                #'org-onit--remove-tag-not-todo)
   (remove-hook 'kill-emacs-hook #'org-onit-clock-out-when-kill-emacs)
@@ -388,6 +402,9 @@ Recommended keybindings:
   (if org-onit-mode
       (org-onit--setup)
     (org-onit--abort)))
+
+;; init
+(add-hook 'org-cycle-hook #'org-onit--clock-in-when-unfolded)
 
 (provide 'org-onit)
 
