@@ -4,7 +4,7 @@
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 0.9.4
+;; Version: 0.9.5
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -233,7 +233,8 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
         (message "Already at the last clocked in.")
       (when (bookmark-get-bookmark org-onit-bookmark-anchor 'noerror)
         (bookmark-delete org-onit-bookmark-anchor))
-      (if (ignore-errors (bookmark-set org-onit-bookmark-anchor))
+      (ignore-errors (bookmark-set org-onit-bookmark-anchor))
+      (if (bookmark-get-bookmark org-onit-bookmark-anchor 'noerror)
           (message "Anchor bookmark was recorded in a file.")
         (message "Anchor bookmark was not recorded for the buffer."))
       (when (and (eq major-mode 'org-mode)
