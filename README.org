@@ -41,7 +41,7 @@ It is recommended to install [[https://github.com/alphapapa/org-bookmark-heading
 
 #+begin_src emacs-lisp
 (with-eval-after-load "org"
-  (setq org-tag-faces '(("Doing" :foreground "#FF0000"))))
+  (add-to-list 'org-tag-faces '("Doing" :foreground "#FF0000")))
 
 (with-eval-after-load "org-clock"
   (setq org-clock-clocked-in-display 'frame-title) ;; or 'both
