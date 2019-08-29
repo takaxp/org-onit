@@ -108,7 +108,7 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
    - Call =org-clock-out= when killing Emacs if =org-clock-persis= is not ='history= or =nil=
    - Default: t
  - org-onit-use-unfold-as-doing
-   - Call =org-clock-in= when a heading is unfold and not clocking.
+   - Call =org-clock-in= when a heading is unfold, not clocking, and having a todo state
    - Default: nil
 
 ** Hooks
