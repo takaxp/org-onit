@@ -141,6 +141,7 @@ This flag is utilized for `org-onit-toggle-auto'."
 (defvar org-onit--org-bookmark-heading-p (require 'org-bookmark-heading nil t))
 (defvar org-onit--clock-in-last-pos nil)
 (defvar org-onit--anchor-last-pos nil)
+(defvar org-onit--frame-title-format frame-title-format)
 
 (defun org-onit--switched-p ()
   "Return t if the current heading was changed."
@@ -272,6 +273,10 @@ STATE should be one of the symbols listed in the docstring of
       (org-onit-mode 1))
     (org-onit--post-action t)))
 
+(defun org-onit--restore-title-format ()
+  "Restore the original title format."
+  (setq frame-title-format org-onit--frame-title-format))
+
 (defun org-onit--setup ()
   "Setup."
   (advice-add 'org-clock-goto :around #'org-onit--clock-goto)
@@ -279,7 +284,9 @@ STATE should be one of the symbols listed in the docstring of
   (add-hook 'org-after-todo-state-change-hook #'org-onit--remove-tag-not-todo)
   (add-hook 'kill-emacs-hook #'org-onit-clock-out-when-kill-emacs)
   (add-hook 'org-clock-in-hook #'org-onit--bookmark-set)
-  (add-hook 'org-clock-out-hook #'org-onit--remove-tag))
+  (add-hook 'org-clock-in-hook #'org-onit--backup-title-format)
+  (add-hook 'org-clock-out-hook #'org-onit--remove-tag)
+  (add-hook 'org-clock-out-hook #'org-onit--restore-title-format))
 
 (defun org-onit--abort ()
   "Cleanup."
@@ -295,7 +302,9 @@ STATE should be one of the symbols listed in the docstring of
                #'org-onit--remove-tag-not-todo)
   (remove-hook 'kill-emacs-hook #'org-onit-clock-out-when-kill-emacs)
   (remove-hook 'org-clock-in-hook #'org-onit--bookmark-set)
-  (remove-hook 'org-clock-out-hook #'org-onit--remove-tag))
+  (remove-hook 'org-clock-in-hook #'org-onit--backup-title-format)
+  (remove-hook 'org-clock-out-hook #'org-onit--remove-tag)
+  (remove-hook 'org-clock-out-hook #'org-onit--restore-title-format))
 
 (defvar org-onit--lighter " Doing")
 (defun org-onit--lighter ()
