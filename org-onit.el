@@ -284,7 +284,6 @@ STATE should be one of the symbols listed in the docstring of
   (add-hook 'org-after-todo-state-change-hook #'org-onit--remove-tag-not-todo)
   (add-hook 'kill-emacs-hook #'org-onit-clock-out-when-kill-emacs)
   (add-hook 'org-clock-in-hook #'org-onit--bookmark-set)
-  (add-hook 'org-clock-in-hook #'org-onit--backup-title-format)
   (add-hook 'org-clock-out-hook #'org-onit--remove-tag)
   (add-hook 'org-clock-out-hook #'org-onit--restore-title-format))
 
@@ -302,7 +301,6 @@ STATE should be one of the symbols listed in the docstring of
                #'org-onit--remove-tag-not-todo)
   (remove-hook 'kill-emacs-hook #'org-onit-clock-out-when-kill-emacs)
   (remove-hook 'org-clock-in-hook #'org-onit--bookmark-set)
-  (remove-hook 'org-clock-in-hook #'org-onit--backup-title-format)
   (remove-hook 'org-clock-out-hook #'org-onit--remove-tag)
   (remove-hook 'org-clock-out-hook #'org-onit--restore-title-format))
 
