@@ -141,7 +141,7 @@ This flag is utilized for `org-onit-toggle-auto'."
 (defvar org-onit--org-bookmark-heading-p (require 'org-bookmark-heading nil t))
 (defvar org-onit--clock-in-last-pos nil)
 (defvar org-onit--anchor-last-pos nil)
-(defvar org-onit--frame-title-format frame-title-format)
+(defvar org-onit--frame-title-format nil)
 
 (defun org-onit--switched-p ()
   "Return t if the current heading was changed."
@@ -273,12 +273,17 @@ STATE should be one of the symbols listed in the docstring of
       (org-onit-mode 1))
     (org-onit--post-action t)))
 
+(defun org-onit--backup-title-format ()
+  "Backup the title format."
+  (setq org-onit--frame-title-format frame-title-format))
+
 (defun org-onit--restore-title-format ()
   "Restore the original title format."
   (setq frame-title-format org-onit--frame-title-format))
 
 (defun org-onit--setup ()
   "Setup."
+  (org-onit--backup-title-format)
   (advice-add 'org-clock-goto :around #'org-onit--clock-goto)
   (add-hook 'org-cycle-hook #'org-onit--clock-in-when-unfolded)
   (add-hook 'org-after-todo-state-change-hook #'org-onit--remove-tag-not-todo)
@@ -292,6 +297,7 @@ STATE should be one of the symbols listed in the docstring of
   (when (and (org-clocking-p)
              (memq org-clock-persist '(history nil)))
     (org-clock-out))
+  (org-onit--restore-title-format)
   (bookmark-delete org-onit-bookmark-anchor)
   (setq org-onit--clock-in-last-pos nil)
   (setq org-onit--anchor-last-pos nil)
