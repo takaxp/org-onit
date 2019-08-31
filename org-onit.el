@@ -1,10 +1,10 @@
-;;; org-onit.el --- Recording your task all the time -*- lexical-binding: t; -*-
+;;; org-onit.el --- Record your task all the time -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2019 Takaaki ISHIKAWA
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 0.9.5
+;; Version: 1.0.0
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -29,7 +29,7 @@
 
 ;; This package provides mainly two capabilities:
 ;;  1. Toggle to switch `org-clock-in' and `org-clock-out'.
-;;  2. Toggle to activate auto clocking of the current org heading.
+;;  2. Toggle to activate auto clocking for the current org heading.
 ;;
 ;; Install:
 ;;  - Get org-onit.el from GitHub.
@@ -37,8 +37,8 @@
 ;; Setup:
 ;;  - After installing this package, you will be able to call interactively
 ;;    `org-onit-toggle-doing' and `org-onit-toggle-auto'.
-;;  - Once these commands are called, `org-onit-mode' is automatically
-;;    activated for the buffer.
+;;  - Once these commands are called, minor mode `org-onit-mode' is
+;;    automatically activated for the buffer.
 ;;
 ;; Keybindings:
 ;;  - No default keybindings are configured.
@@ -66,23 +66,24 @@
   :type 'string
   :group 'org-onit)
 
-(defcustom org-onit-tag "Doing"
+(defcustom org-onit-doing-tag "Doing"
   "Tag name to show the current task now clocking."
   :type 'string
   :group 'org-onit)
 
 (defcustom org-onit-bookmark "org-onit-last-clock-in"
-  "Bookmark for last clock in heading."
+  "Bookmark for the heading last clock-in."
   :type 'string
   :group 'org-onit)
 
 (defcustom org-onit-bookmark-anchor "org-onit-anchor"
-  "Bookmark to store anchor position."
+  "Bookmark to store an anchor position."
   :type 'string
   :group 'org-onit)
 
 (defcustom org-onit-wakeup-done nil
-  "If non-nil, start clocking even if the task is marked done in `org-onit-toggle-doing'.  This flag is not utilized for `org-onit-toggle-auto'."
+  "If non-nil, start clocking even if the task is marked done.
+This flag is not utilized for `org-onit-toggle-auto'."
   :type 'boolean
   :group 'org-onit)
 
@@ -96,22 +97,22 @@ This flag is utilized for `org-onit-toggle-auto'."
   "If non-nil, `org-clock-out' will be called when killing Emacs.")
 
 (defcustom org-onit-use-unfold-as-doing nil
-  "If non-nil, clock-in when a heading is unfold and not clocking."
+  "If non-nil, clock-in when a heading is changed to unfold and not clocking."
   :type 'boolean
   :group 'org-onit)
 
 (defcustom org-onit-switch-task-hook nil
-  "Hook runs after activating new clock in auto clocking."
+  "Hook runs after activating new clock-in when auto clocking."
   :type 'hook
   :group 'org-onit)
 
 (defcustom org-onit-start-autoclock-hook nil
-  "Hook runs after starting auto clock in."
+  "Hook runs after starting auto clock-in."
   :type 'hook
   :group 'org-onit)
 
 (defcustom org-onit-stop-autoclock-hook nil
-  "Hook runs after stopping auto clock in."
+  "Hook runs after stopping auto clock-in."
   :type 'hook
   :group 'org-onit)
 
@@ -122,7 +123,7 @@ This flag is utilized for `org-onit-toggle-auto'."
 
 (defcustom org-onit-clocking-sign-alist
   '("▁" "▂" "▃" "▄" "▅" "▆" "▇" "▇" "▇" "▆" "▅" "▄" "▃" "▂" "▁" "▁" "▁")
-  "List of signs to show a clock is active."
+  "List of signs to show now clocking in a heading."
   :type 'list
   :group 'org-onit)
 
@@ -142,6 +143,11 @@ This flag is utilized for `org-onit-toggle-auto'."
 (defvar org-onit--clock-in-last-pos nil)
 (defvar org-onit--anchor-last-pos nil)
 (defvar org-onit--frame-title-format nil)
+(defvar org-onit--lighter " Doing")
+
+(defun org-onit--lighter ()
+  "Lighter."
+  org-onit--lighter)
 
 (defun org-onit--switched-p ()
   "Return t if the current heading was changed."
@@ -171,17 +177,17 @@ This flag is utilized for `org-onit-toggle-auto'."
           switched)))))
 
 (defun org-onit--target-p ()
-  "Return t if the heading is valid task for clock in."
+  "Return t if the heading is valid task for clock-in."
   (or (org-entry-is-todo-p)
       (and (not (org-entry-is-done-p))
            org-onit-include-no-status-heading)))
 
 (defun org-onit--tagged-p ()
-  "Return t if the current heading tagged with `org-onit-tag'."
-  (member org-onit-tag (org-get-tags (point) t)))
+  "Return t if the current heading tagged with `org-onit-doing-tag'."
+  (member org-onit-doing-tag (org-get-tags (point) t)))
 
 (defun org-onit--bookmark-set ()
-  "Save the bookmark of the current heading."
+  "Save the bookmark for the current heading."
   (save-excursion
     (save-restriction
       (org-back-to-heading t)
@@ -194,18 +200,18 @@ This flag is utilized for `org-onit-toggle-auto'."
         (bookmark-delete org-onit-bookmark-anchor)))))
 
 (defun org-onit--remove-tag ()
-  "Remove `org-onit-tag' tag from the current heading."
+  "Remove `org-onit-doing-tag' tag from the current heading."
   (when (org-onit--tagged-p)
-    (org-toggle-tag org-onit-tag 'off)))
+    (org-toggle-tag org-onit-doing-tag 'off)))
 
 (defun org-onit--remove-tag-not-todo ()
-  "Remove `org-onit-tag' tag if the heading is done or no status."
+  "Remove `org-onit-doing-tag' tag if the heading is done or no status."
   (when (or (org-entry-is-done-p)
             (not (org-entry-is-todo-p)))
-    (org-toggle-tag org-onit-tag 'off)))
+    (org-toggle-tag org-onit-doing-tag 'off)))
 
 (defun org-onit--post-action (&optional switched)
-  "Clock in.
+  "A combined action of clock-out and clock-in.
 If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
   (when (and org-onit-mode
              (or switched
@@ -213,7 +219,7 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
     (when (org-clocking-p)
       (org-clock-out))
     (when (org-onit--target-p)
-      (org-toggle-tag org-onit-tag 'on)
+      (org-toggle-tag org-onit-doing-tag 'on)
       (org-clock-in)
       (run-hooks 'org-onit-switch-task-hook))
     (org-cycle-hide-drawers 'children)
@@ -228,7 +234,10 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
     (run-hooks 'org-onit-after-jump-hook)))
 
 (defun org-onit--clock-goto (f &optional select)
-  "Go to the current clocking task.  Even after restart of Emacs, try to restore the current task from `bookmark'.  F is the original `org-clock-goto'.  SELECT is the optional argument of `org-clock-goto'."
+  "Go to the current clocking task.
+Even after restart of Emacs, try to restore the current task from a bookmark.
+F is the original `org-clock-goto'.
+SELECT is the optional argument of `org-clock-goto'."
   (let ((bm (bookmark-get-bookmark org-onit-bookmark 'noerror)))
     (if (eq (point) org-onit--clock-in-last-pos)
         (message "Already at the last clocked in.")
@@ -274,7 +283,7 @@ STATE should be one of the symbols listed in the docstring of
     (org-onit--post-action t)))
 
 (defun org-onit--backup-title-format ()
-  "Backup the title format."
+  "Backup `the-title-format'."
   (setq org-onit--frame-title-format frame-title-format))
 
 (defun org-onit--restore-title-format ()
@@ -309,11 +318,6 @@ STATE should be one of the symbols listed in the docstring of
   (remove-hook 'org-clock-in-hook #'org-onit--bookmark-set)
   (remove-hook 'org-clock-out-hook #'org-onit--remove-tag)
   (remove-hook 'org-clock-out-hook #'org-onit--restore-title-format))
-
-(defvar org-onit--lighter " Doing")
-(defun org-onit--lighter ()
-  "Lighter."
-  org-onit--lighter)
 
 ;; public functions
 
@@ -358,7 +362,7 @@ STATE should be one of the symbols listed in the docstring of
 
 ;;;###autoload
 (defun org-onit-toggle-doing ()
-  "Toggle `org-onit-tag' tag.
+  "Toggle `org-onit-doing-tag' tag.
 This command also switches `org-clock-in' and `org-clock-out'."
   (interactive)
   (when (eq major-mode 'org-mode)
@@ -371,16 +375,16 @@ This command also switches `org-clock-in' and `org-clock-out'."
          ((org-onit--tagged-p)
           (when (org-clocking-p)
             (org-clock-out))
-          (org-toggle-tag org-onit-tag 'off))
+          (org-toggle-tag org-onit-doing-tag 'off))
          (t
           (if (org-entry-is-done-p)
               (if (not org-onit-wakeup-done)
                   (message "Prevent `org-clock-in' and switching to TODO.")
                 (org-todo org-onit-todo-state)
                 (org-clock-in)
-                (org-toggle-tag org-onit-tag 'on))
+                (org-toggle-tag org-onit-doing-tag 'on))
             (org-clock-in)
-            (org-toggle-tag org-onit-tag 'on))))))
+            (org-toggle-tag org-onit-doing-tag 'on))))))
     (org-cycle-hide-drawers 'children)
     (org-reveal)))
 
@@ -395,12 +399,14 @@ is removed. Basically, a single heading tagged with `org-doing-tag' will
 appear in org buffers.
 
 The tagged heading can be easily revisited by calling the extended
-`org-clock-goto' command whether you edit another heading in any org buffers.
+`org-clock-goto' command whether you are editing another heading in any
+org buffers.
 
 An automated `org-clock-in' capability is also provided by this package.
-A heading that you currently visit in an org buffer will be automatically
-clocked with executing `org-clock-in'. After you switch to other headings,
-the active clock will be automatically updated without any additional actions.
+A heading that you are currently visiting in an org buffer will be
+automatically clocked with executing `org-clock-in'. After you switch to
+other headings, the active clock will be automatically updated without any
+additional actions.
 
 Recommended settings for `org-clock':
   (setq org-clock-out-remove-zero-time-clocks t) ;; you should apply this.

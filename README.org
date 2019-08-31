@@ -22,6 +22,7 @@ It is recommended to install [[https://github.com/alphapapa/org-bookmark-heading
 * Recommend settings
 
 ** Highly recommended
+
 #+begin_src emacs-lisp
 (with-eval-after-load "org-clock"
   (setq org-clock-out-remove-zero-time-clocks t))
@@ -31,13 +32,15 @@ It is recommended to install [[https://github.com/alphapapa/org-bookmark-heading
 
 #+begin_src emacs-lisp
 (with-eval-after-load "org"
+  (global-set-key (kbd "C-<f11>") 'org-clock-goto)
   (define-key org-mode-map (kbd "<f11>") 'org-onit-toggle-doing)
   (define-key org-mode-map (kbd "M-<f11>") 'org-onit-toggle-auto)
-  (define-key org-mode-map (kbd "S-<f11>") 'org-onit-goto-anchor)
-  (global-set-key (kbd "C-<f11>") 'org-clock-goto))
+  (define-key org-mode-map (kbd "S-<f11>") 'org-onit-goto-anchor))
 #+end_src
 
 ** Optional settings
+
+You can freely arrange =org-clock-frame-title-format=. If you install [[https://github.com/mallt/org-clock-today-mode][org-clock-toay.el]] in your system, then you can show a working time only for today.
 
 #+begin_src emacs-lisp
 (with-eval-after-load "org"
@@ -112,6 +115,7 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
    - Default: nil
 
 ** Hooks
+
  - org-onit-switch-task-hook
  - org-onit-start-autoclock-hook
  - org-onit-stop-autoclock-hook
@@ -123,3 +127,5 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
      (show-children))
    (add-hook 'org-onit-after-jump-hook #'my-org-reveal)
    #+end_src
+* ChangeLog
+ - 2019-09-01: initial release
