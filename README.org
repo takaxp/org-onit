@@ -129,7 +129,7 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
 * ChangeLog
  - 1.0.1 (2019-09-01)
    - Rename "todo status" to "todo state"
-   - [breaking change] rename to =org-onit-include-no-status-heading=
+   - [breaking change] rename to =org-onit-include-no-state-heading=
    - [new] support to clock-out when removing todo state
  - 1.0.0 (2019-09-01)
    - initial release
