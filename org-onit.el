@@ -4,7 +4,7 @@
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 1.0.0
+;; Version: 1.0.1
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -208,6 +208,8 @@ This flag is utilized for `org-onit-toggle-auto'."
   "Remove `org-onit-doing-tag' tag if the heading is done or no state."
   (when (or (org-entry-is-done-p)
             (not (org-entry-is-todo-p)))
+    (when (org-clocking-p)
+      (org-clock-out))
     (org-toggle-tag org-onit-doing-tag 'off)))
 
 (defun org-onit--post-action (&optional switched)
