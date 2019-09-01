@@ -88,7 +88,7 @@ This flag is not utilized for `org-onit-toggle-auto'."
   :group 'org-onit)
 
 (defcustom org-onit-include-no-state-heading nil
-  "If non-nil, clock the task even if it doesn't have todo status.
+  "If non-nil, clock the task even if it doesn't have todo state.
 This flag is utilized for `org-onit-toggle-auto'."
   :type 'boolean
   :group 'org-onit)
@@ -138,7 +138,7 @@ This flag is utilized for `org-onit-toggle-auto'."
 
 (defvar org-onit--auto-clocking nil)
 (defvar org-onit--heading nil)
-(defvar org-onit--status nil)
+(defvar org-onit--state nil)
 (defvar org-onit--org-bookmark-heading-p (require 'org-bookmark-heading nil t))
 (defvar org-onit--clock-in-last-pos nil)
 (defvar org-onit--anchor-last-pos nil)
@@ -156,7 +156,7 @@ This flag is utilized for `org-onit-toggle-auto'."
         (when (org-clocking-p)
           (org-clock-out))
         (setq org-onit--heading nil)
-        (setq org-onit--status nil))
+        (setq org-onit--state nil))
     (save-excursion
       (save-restriction
         (org-back-to-heading t)
@@ -164,13 +164,13 @@ This flag is utilized for `org-onit-toggle-auto'."
                (heading (plist-get element :title))
                (todo (plist-get element :todo-keyword))
                (switched nil))
-          (unless (equal org-onit--status todo)
-            (when (or (not org-onit--status) ;; nil -> something
+          (unless (equal org-onit--state todo)
+            (when (or (not org-onit--state) ;; nil -> something
                       (not ;; todo1 -> done or nil, except todo1 -> todo2
-                       (and (not (member org-onit--status org-done-keywords))
+                       (and (not (member org-onit--state org-done-keywords))
                             (not (member todo org-done-keywords)))))
               (setq switched t))
-            (setq org-onit--status todo))
+            (setq org-onit--state todo))
           (unless (equal org-onit--heading heading)
             (setq switched t)
             (setq org-onit--heading heading))
@@ -205,7 +205,7 @@ This flag is utilized for `org-onit-toggle-auto'."
     (org-toggle-tag org-onit-doing-tag 'off)))
 
 (defun org-onit--remove-tag-not-todo ()
-  "Remove `org-onit-doing-tag' tag if the heading is done or no status."
+  "Remove `org-onit-doing-tag' tag if the heading is done or no state."
   (when (or (org-entry-is-done-p)
             (not (org-entry-is-todo-p)))
     (org-toggle-tag org-onit-doing-tag 'off)))
