@@ -87,7 +87,7 @@ This flag is not utilized for `org-onit-toggle-auto'."
   :type 'boolean
   :group 'org-onit)
 
-(defcustom org-onit-include-no-status-heading nil
+(defcustom org-onit-include-no-state-heading nil
   "If non-nil, clock the task even if it doesn't have todo status.
 This flag is utilized for `org-onit-toggle-auto'."
   :type 'boolean
@@ -180,7 +180,7 @@ This flag is utilized for `org-onit-toggle-auto'."
   "Return t if the heading is valid task for clock-in."
   (or (org-entry-is-todo-p)
       (and (not (org-entry-is-done-p))
-           org-onit-include-no-status-heading)))
+           org-onit-include-no-state-heading)))
 
 (defun org-onit--tagged-p ()
   "Return t if the current heading tagged with `org-onit-doing-tag'."
