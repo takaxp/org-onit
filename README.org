@@ -120,11 +120,13 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
  - org-onit-stop-autoclock-hook
  - org-onit-after-jump-hook
    #+begin_src emacs-lisp
-   (defun my-org-reveal ()
+   (defun my-onit-reveal ()
      (org-reveal)
+     (org-cycle-hide-drawers 'all)
      (org-show-entry)
-     (show-children))
-   (add-hook 'org-onit-after-jump-hook #'my-org-reveal)
+     (show-children)
+     (org-show-siblings))
+   (add-hook 'org-onit-after-jump-hook #'my-onit-reveal)
    #+end_src
 * ChangeLog
  - 1.0.1 (2019-09-01)
