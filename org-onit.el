@@ -183,11 +183,15 @@ This flag is utilized for `org-onit-toggle-auto'."
             (setq org-onit--heading heading))
           switched)))))
 
-(defun org-onit--target-p ()
+(defun org-onit--auto-target-p ()
   "Return t if the heading is valid task for clock-in."
-  (or (org-entry-is-todo-p)
-      (and (not (org-entry-is-done-p))
-           (memq (plist-get org-onit-toggle-options :nostate) '(auto both)))))
+  (cond
+   ((not (org-get-todo-state))
+    (when (memq (plist-get org-onit-toggle-options :nostate) '(auto both)) t))
+   ((org-entry-is-done-p)
+    (when (memq (plist-get org-onit-toggle-options :wakeup) '(auto both)) t))
+   ((org-entry-is-todo-p) t)
+   (t nil)))
 
 (defun org-onit--tagged-p ()
   "Return t if the current heading tagged with `org-onit-doing-tag'."
@@ -225,7 +229,7 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
                  (org-onit--switched-p)))
     (when (org-clocking-p)
       (org-clock-out))
-    (when (org-onit--target-p)
+    (when (org-onit--auto-target-p)
       (org-onit--clock-in)
       (run-hooks 'org-onit-switch-task-hook))
     (org-cycle-hide-drawers 'children)
@@ -396,20 +400,21 @@ This command also switches `org-clock-in' and `org-clock-out'."
     (save-excursion
       (save-restriction
         (org-back-to-heading t)
-        (cond ((org-onit--tagged-p)
-               (org-onit--clock-out))
-              ((not (org-get-todo-state))
-               (if (memq (plist-get org-onit-toggle-options :nostate) '(doing both))
-                   (org-onit--clock-in)
-                 (message "Prevent `org-clock-in' because the heading has no todo state.")))
-              ((org-entry-is-done-p)
-               (if (memq (plist-get org-onit-toggle-options :wakeup) '(doing both))
-                   (progn
-                     (org-todo org-onit-todo-state)
-                     (org-onit--clock-in))
-                 (message "Prevent `org-clock-in'. And not switching to TODO.")))
-              ((org-entry-is-todo-p)
-               (org-onit--clock-in)))))
+        (cond
+         ((org-onit--tagged-p)
+          (org-onit--clock-out))
+         ((not (org-get-todo-state))
+          (if (memq (plist-get org-onit-toggle-options :nostate) '(doing both))
+              (org-onit--clock-in)
+            (message "Prevent `org-clock-in'. Heading has no todo state.")))
+         ((org-entry-is-done-p)
+          (if (memq (plist-get org-onit-toggle-options :wakeup) '(doing both))
+              (progn
+                (org-todo org-onit-todo-state)
+                (org-onit--clock-in))
+            (message "Prevent `org-clock-in'. And not switching to TODO.")))
+         ((org-entry-is-todo-p)
+          (org-onit--clock-in)))))
     (org-cycle-hide-drawers 'children)
     (org-reveal)))
 
