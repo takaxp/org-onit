@@ -66,7 +66,7 @@ If you apply the above recommended keybindings, then just type =<f11>= in an org
 =org-clock-in= will be called when:
 
 - calling =org-onit-toggle-doing= if the task is not ~DONE~
-- calling =org-onit-toggle-doing= at any headings if =org-onit-wakeup-done= is non-nil
+- calling =org-onit-toggle-doing= at any headings if =:wakeup= of =org-onit-toggle-options= is =doing= or =both=
 - unfolding a heading if =org-onit-use-unfold-as-doing= is non-nil
 
 **** clock-out triggers
@@ -87,7 +87,7 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
 =org-clock-in= will be called when:
 
 - visiting a heading if the task is not ~DONE~
-- visiting a heading if =org-onit-include-no-state-heading= is non-nil and the task is not ~DONE~
+- visiting a heading if =:nostate= of =org-onit-toggle-options= is =auto= or =both= and the task is not ~DONE~
 - making the task not ~DONE~
 
 **** clock-out triggers
@@ -95,19 +95,27 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
 =org-clock-out= will be called when:
 
 - switching to other headings if the task has a todo state (e.g. ~TODO~)
-- switching to other headings if =org-onit-include-no-state-heading= is non-nil and the task is not ~DONE~
+- switching to other headings if =:nostate= of =org-onit-toggle-options== is =auto= or =both= and the task is not ~DONE~
 - making the task ~DONE~
 - calling =org-onit-toggle-doing=
 
 ** Options
- - org-onit-wakeup-done
+ - org-onit-wakeup-done (~deprecated~, use =org-onit-toggle-options=)
    - Allow switching to =org-clock-in= by =org-onit-toggle-doing= when the heading is DONE.
    - Default: nil
- - org-onit-include-no-state-heading
+ - org-onit-include-no-state-heading (~deprecated~, use =org-onit-toggle-options=)
    - Allow switching to =org-clock-in= in any headings except headings in TODO when =org-onit-toggle-auto= is used
    - Default: nil
+ - org-onit-toggle-options
+   - =:wakeup= allows switching to =org-clock-in= when the heading is DONE.
+   - =:nostate= allows switching to =org-clock-in= in any headings except headings in TODO
+   - Default: (=:wakeup= nil =:nostate= nil)
+     - Both properties can take =doing=, =auto=, =both=, and =nil=
+     - If =doing= is specified, the option will be used in =org-onit-toggle-doing=
+     - If =auto= is specified, the option will be used in =org-onit-toggle-auto=
+     - If =both= is specified, the option will be used in =org-onit-toggle-doing= and =org-onit-toggle-auto=
  - org-onit-encure-clock-out-when-exit
-   - Call =org-clock-out= when killing Emacs if =org-clock-persis= is not ='history= or =nil=
+   - Call =org-clock-out= when killing Emacs if =org-clock-persis= is not =history= or =nil=
    - Default: t
  - org-onit-use-unfold-as-doing
    - Call =org-clock-in= when a heading is unfold, not clocking, and having a todo state
@@ -129,8 +137,13 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
    (add-hook 'org-onit-after-jump-hook #'my-onit-reveal)
    #+end_src
 * ChangeLog
+ - 1.0.2 (2019-09-12)
+   - [new] =org-onit-toggle-options= is introduced
+   - [improved] =org-clock-in-switch-to-state= is reflected to =org-onit-todo-state=
+   - [deprecated] =org-onit-wakeup-done=
+   - [deprecated] =org-onit-include-no-state-heading=
  - 1.0.1 (2019-09-01)
-   - Rename "todo status" to "todo state"
+   - [improved] Rename "todo status" to "todo state"
    - [breaking change] rename to =org-onit-include-no-state-heading=
    - [new] support to clock-out when removing todo state
  - 1.0.0 (2019-09-01)
