@@ -61,7 +61,11 @@
   "Commands to toggle `org-clock-in' and `org-clock-out'."
   :group 'convenience)
 
-(defcustom org-onit-todo-state "TODO"
+(defcustom org-onit-todo-state (or
+                                (when (functionp org-clock-in-switch-to-state)
+                                  (funcall org-clock-in-switch-to-state))
+                                org-clock-in-switch-to-state
+                                "TODO")
   "The default todo state."
   :type 'string
   :group 'org-onit)
