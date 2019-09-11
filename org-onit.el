@@ -81,6 +81,13 @@
   :type 'string
   :group 'org-onit)
 
+(defcustom org-onit-toggle-options '(:wakeup nil :nostate nil)
+  "Combined options for `org-onit-toggle-doing' and `org-onit-toggle-auto'.
+:wakeup {'doing, 'auto, 'both, nil}
+:nostate {'doing, 'auto, 'both, nil}"
+  :type 'plist
+  :group 'org-onit)
+
 (defcustom org-onit-wakeup-done nil
   "If non-nil, start clocking even if the task is marked done.
 This flag is not utilized for `org-onit-toggle-auto'."
@@ -180,7 +187,7 @@ This flag is utilized for `org-onit-toggle-auto'."
   "Return t if the heading is valid task for clock-in."
   (or (org-entry-is-todo-p)
       (and (not (org-entry-is-done-p))
-           org-onit-include-no-state-heading)))
+           (memq (plist-get org-onit-toggle-options :nostate) '(auto both)))))
 
 (defun org-onit--tagged-p ()
   "Return t if the current heading tagged with `org-onit-doing-tag'."
@@ -294,6 +301,14 @@ STATE should be one of the symbols listed in the docstring of
 
 (defun org-onit--setup ()
   "Setup."
+  ;; This section will be removed based on the availability of `org-onit-wakeup-done' and `org-onit-include-no-state-heading'
+  (when (and (plist-get org-onit-toggle-options :wakeup nil)
+             (plist-get org-onit-toggle-options :nostate nil))
+    (plist-put org-onit-toggle-options
+               :wakeup (when org-onit-wakeup-done 'doing))
+    (plist-put org-onit-toggle-options
+               :nostate (when org-onit-include-no-state-heading 'auto)))
+
   (org-onit--backup-title-format)
   (advice-add 'org-clock-goto :around #'org-onit--clock-goto)
   (add-hook 'org-cycle-hook #'org-onit--clock-in-when-unfolded)
@@ -380,7 +395,8 @@ This command also switches `org-clock-in' and `org-clock-out'."
           (org-toggle-tag org-onit-doing-tag 'off))
          (t
           (if (org-entry-is-done-p)
-              (if (not org-onit-wakeup-done)
+              (if (not (memq (plist-get org-onit-toggle-options :wakeup)
+                             '(doing both)))
                   (message "Prevent `org-clock-in' and switching to TODO.")
                 (org-todo org-onit-todo-state)
                 (org-clock-in)
