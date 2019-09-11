@@ -187,9 +187,9 @@ This flag is utilized for `org-onit-toggle-auto'."
   "Return t if the heading is valid task for clock-in."
   (cond
    ((not (org-get-todo-state))
-    (when (memq (plist-get org-onit-toggle-options :nostate) '(auto both)) t))
+    (memq (plist-get org-onit-toggle-options :nostate) '(auto both)))
    ((org-entry-is-done-p)
-    (when (memq (plist-get org-onit-toggle-options :wakeup) '(auto both)) t))
+    (memq (plist-get org-onit-toggle-options :wakeup) '(auto both)))
    ((org-entry-is-todo-p) t)
    (t nil)))
 
