@@ -302,8 +302,8 @@ STATE should be one of the symbols listed in the docstring of
 (defun org-onit--setup ()
   "Setup."
   ;; This section will be removed based on the availability of `org-onit-wakeup-done' and `org-onit-include-no-state-heading'
-  (when (and (plist-get org-onit-toggle-options :wakeup nil)
-             (plist-get org-onit-toggle-options :nostate nil))
+  (unless (and (plist-get org-onit-toggle-options :wakeup)
+               (plist-get org-onit-toggle-options :nostate))
     (plist-put org-onit-toggle-options
                :wakeup (when org-onit-wakeup-done 'doing))
     (plist-put org-onit-toggle-options
