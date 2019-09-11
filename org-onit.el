@@ -4,7 +4,7 @@
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 1.0.1
+;; Version: 1.0.2
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -61,7 +61,11 @@
   "Commands to toggle `org-clock-in' and `org-clock-out'."
   :group 'convenience)
 
-(defcustom org-onit-todo-state "TODO"
+(defcustom org-onit-todo-state (or
+                                (when (functionp org-clock-in-switch-to-state)
+                                  (funcall org-clock-in-switch-to-state))
+                                org-clock-in-switch-to-state
+                                "TODO")
   "The default todo state."
   :type 'string
   :group 'org-onit)
@@ -79,6 +83,14 @@
 (defcustom org-onit-bookmark-anchor "org-onit-anchor"
   "Bookmark to store an anchor position."
   :type 'string
+  :group 'org-onit)
+
+(defcustom org-onit-toggle-options '(:wakeup nil :nostate nil)
+  "Combined options for `org-onit-toggle-doing' and `org-onit-toggle-auto'.
+Both properties can take {doing, auto, both, nil}.
+:wakeup    If non-nil, start clocking even if the task is marked DONE.
+:nostate   If non-nil, clock the task even if it doesn't have todo state."
+  :type 'plist
   :group 'org-onit)
 
 (defcustom org-onit-wakeup-done nil
@@ -153,8 +165,7 @@ This flag is utilized for `org-onit-toggle-auto'."
   "Return t if the current heading was changed."
   (if (org-before-first-heading-p)
       (progn
-        (when (org-clocking-p)
-          (org-clock-out))
+        (org-onit--clock-out)
         (setq org-onit--heading nil)
         (setq org-onit--state nil))
     (save-excursion
@@ -176,11 +187,15 @@ This flag is utilized for `org-onit-toggle-auto'."
             (setq org-onit--heading heading))
           switched)))))
 
-(defun org-onit--target-p ()
-  "Return t if the heading is valid task for clock-in."
-  (or (org-entry-is-todo-p)
-      (and (not (org-entry-is-done-p))
-           org-onit-include-no-state-heading)))
+(defun org-onit--auto-target-p ()
+  "Return non-nil if the heading is valid task for clock-in."
+  (cond
+   ((org-entry-is-done-p)
+    (memq (plist-get org-onit-toggle-options :wakeup) '(auto both)))
+   ((not (org-get-todo-state))
+    (memq (plist-get org-onit-toggle-options :nostate) '(auto both)))
+   ((org-entry-is-todo-p) t)
+   (t nil)))
 
 (defun org-onit--tagged-p ()
   "Return t if the current heading tagged with `org-onit-doing-tag'."
@@ -207,10 +222,8 @@ This flag is utilized for `org-onit-toggle-auto'."
 (defun org-onit--remove-tag-not-todo ()
   "Remove `org-onit-doing-tag' tag if the heading is done or no state."
   (when (or (org-entry-is-done-p)
-            (not (org-entry-is-todo-p)))
-    (when (org-clocking-p)
-      (org-clock-out))
-    (org-toggle-tag org-onit-doing-tag 'off)))
+            (not (org-get-todo-state)))
+    (org-onit--clock-out)))
 
 (defun org-onit--post-action (&optional switched)
   "A combined action of clock-out and clock-in.
@@ -218,11 +231,9 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
   (when (and org-onit-mode
              (or switched
                  (org-onit--switched-p)))
-    (when (org-clocking-p)
-      (org-clock-out))
-    (when (org-onit--target-p)
-      (org-toggle-tag org-onit-doing-tag 'on)
-      (org-clock-in)
+    (org-onit--clock-out)
+    (when (org-onit--auto-target-p)
+      (org-onit--clock-in)
       (run-hooks 'org-onit-switch-task-hook))
     (org-cycle-hide-drawers 'children)
     (org-reveal)))
@@ -270,7 +281,7 @@ SELECT is the optional argument of `org-clock-goto'."
   (when (and org-onit-encure-clock-out-when-exit
              (org-clocking-p)
              (memq org-clock-persist '(history nil)))
-    (org-clock-out)
+    (org-onit--clock-out)
     (save-some-buffers t)))
 
 (defun org-onit--clock-in-when-unfolded (state)
@@ -284,6 +295,18 @@ STATE should be one of the symbols listed in the docstring of
       (org-onit-mode 1))
     (org-onit--post-action t)))
 
+(defun org-onit--clock-in ()
+  "Clock-in and adding `org-onit-doing-tag' tag."
+  (unless (org-entry-is-todo-p)
+    (org-todo org-onit-todo-state))
+  (org-clock-in)
+  (org-toggle-tag org-onit-doing-tag 'on))
+
+(defun org-onit--clock-out ()
+  "Clock-out and remove `org-onit-doing-tag' tag."
+  (when (org-clocking-p)
+    (org-clock-out)))
+
 (defun org-onit--backup-title-format ()
   "Backup `the-title-format'."
   (setq org-onit--frame-title-format frame-title-format))
@@ -294,6 +317,14 @@ STATE should be one of the symbols listed in the docstring of
 
 (defun org-onit--setup ()
   "Setup."
+  ;; This section will be removed based on the availability of `org-onit-wakeup-done' and `org-onit-include-no-state-heading'
+  (when (and (not (plist-get org-onit-toggle-options :wakeup))
+             (not (plist-get org-onit-toggle-options :nostate)))
+    (plist-put org-onit-toggle-options
+               :wakeup (when org-onit-wakeup-done 'doing))
+    (plist-put org-onit-toggle-options
+               :nostate (when org-onit-include-no-state-heading 'auto)))
+
   (org-onit--backup-title-format)
   (advice-add 'org-clock-goto :around #'org-onit--clock-goto)
   (add-hook 'org-cycle-hook #'org-onit--clock-in-when-unfolded)
@@ -307,7 +338,7 @@ STATE should be one of the symbols listed in the docstring of
   "Cleanup."
   (when (and (org-clocking-p)
              (memq org-clock-persist '(history nil)))
-    (org-clock-out))
+    (org-onit--clock-out))
   (org-onit--restore-title-format)
   (bookmark-delete org-onit-bookmark-anchor)
   (setq org-onit--clock-in-last-pos nil)
@@ -357,8 +388,7 @@ STATE should be one of the symbols listed in the docstring of
           (t
            (setq org-onit--lighter " Doing")
            (remove-hook 'post-command-hook #'org-onit--post-action)
-           (when (org-clocking-p)
-             (org-clock-out))
+           (org-onit--clock-out)
            (run-hooks 'org-onit-stop-autoclock-hook)))
     (redraw-modeline)))
 
@@ -375,18 +405,17 @@ This command also switches `org-clock-in' and `org-clock-out'."
         (org-back-to-heading t)
         (cond
          ((org-onit--tagged-p)
-          (when (org-clocking-p)
-            (org-clock-out))
-          (org-toggle-tag org-onit-doing-tag 'off))
-         (t
-          (if (org-entry-is-done-p)
-              (if (not org-onit-wakeup-done)
-                  (message "Prevent `org-clock-in' and switching to TODO.")
-                (org-todo org-onit-todo-state)
-                (org-clock-in)
-                (org-toggle-tag org-onit-doing-tag 'on))
-            (org-clock-in)
-            (org-toggle-tag org-onit-doing-tag 'on))))))
+          (org-onit--clock-out))
+         ((org-entry-is-done-p)
+          (if (memq (plist-get org-onit-toggle-options :wakeup) '(doing both))
+              (org-onit--clock-in)
+            (message "Prevent `org-clock-in'. And not switching to TODO.")))
+         ((not (org-get-todo-state))
+          (if (memq (plist-get org-onit-toggle-options :nostate) '(doing both))
+              (org-onit--clock-in)
+            (message "Prevent `org-clock-in'. Heading has no todo state.")))
+         ((org-entry-is-todo-p)
+          (org-onit--clock-in)))))
     (org-cycle-hide-drawers 'children)
     (org-reveal)))
 
