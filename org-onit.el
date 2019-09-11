@@ -396,22 +396,20 @@ This command also switches `org-clock-in' and `org-clock-out'."
     (save-excursion
       (save-restriction
         (org-back-to-heading t)
-        (cond
-         ((org-onit--tagged-p)
-          (org-onit--clock-out))
-         (t
-          (cond ((not (org-get-todo-state))
-                 (if (memq (plist-get org-onit-toggle-options :nostate) '(doing both))
-                     (org-onit--clock-in)
-                   (message "Prevent `org-clock-in'. And not switching to TODO.")))
-                ((org-entry-is-done-p)
-                 (if (memq (plist-get org-onit-toggle-options :wakeup) '(doing both))
-                     (progn
-                       (org-todo org-onit-todo-state)
-                       (org-onit--clock-in))
-                   (message "Prevent `org-clock-in' because the heading has no todo state.")))
-                ((org-entry-is-todo-p)
-                 (org-onit--clock-in)))))))
+        (cond ((org-onit--tagged-p)
+               (org-onit--clock-out))
+              ((not (org-get-todo-state))
+               (if (memq (plist-get org-onit-toggle-options :nostate) '(doing both))
+                   (org-onit--clock-in)
+                 (message "Prevent `org-clock-in'. And not switching to TODO.")))
+              ((org-entry-is-done-p)
+               (if (memq (plist-get org-onit-toggle-options :wakeup) '(doing both))
+                   (progn
+                     (org-todo org-onit-todo-state)
+                     (org-onit--clock-in))
+                 (message "Prevent `org-clock-in' because the heading has no todo state.")))
+              ((org-entry-is-todo-p)
+               (org-onit--clock-in)))))
     (org-cycle-hide-drawers 'children)
     (org-reveal)))
 
