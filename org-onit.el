@@ -228,8 +228,7 @@ If SWITCHED is non-nil, then do not check `org-onit--switched-p'."
     (when (org-clocking-p)
       (org-clock-out))
     (when (org-onit--target-p)
-      (org-toggle-tag org-onit-doing-tag 'on)
-      (org-clock-in)
+      (org-onit--clock-in)
       (run-hooks 'org-onit-switch-task-hook))
     (org-cycle-hide-drawers 'children)
     (org-reveal)))
@@ -290,6 +289,11 @@ STATE should be one of the symbols listed in the docstring of
     (unless org-onit-mode
       (org-onit-mode 1))
     (org-onit--post-action t)))
+
+(defun org-onit--clock-in ()
+  "Clock-in and adding `org-onit-doing-tag' tag."
+  (org-clock-in)
+  (org-toggle-tag org-onit-doing-tag 'on))
 
 (defun org-onit--backup-title-format ()
   "Backup `the-title-format'."
@@ -399,15 +403,13 @@ This command also switches `org-clock-in' and `org-clock-out'."
                         '(doing both))
                   (progn
                     (org-todo org-onit-todo-state)
-                    (org-clock-in)
-                    (org-toggle-tag org-onit-doing-tag 'on))
+                    (org-onit--clock-in))
                 (message "Prevent `org-clock-in'. And not switching to TODO."))
             (if (and (not (org-entry-is-todo-p))
                      (memq (plist-get org-onit-toggle-options :nostate)
                            '(doing both)))
                 (message "Prevent `org-clock-in' because the heading has no todo state.")
-              (org-clock-in)
-              (org-toggle-tag org-onit-doing-tag 'on)))))))
+              (org-onit--clock-in)))))))
     (org-cycle-hide-drawers 'children)
     (org-reveal)))
 
