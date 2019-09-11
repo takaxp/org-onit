@@ -215,9 +215,7 @@ This flag is utilized for `org-onit-toggle-auto'."
   "Remove `org-onit-doing-tag' tag if the heading is done or no state."
   (when (or (org-entry-is-done-p)
             (not (org-entry-is-todo-p)))
-    (when (org-clocking-p)
-      (org-clock-out))
-    (org-toggle-tag org-onit-doing-tag 'off)))
+    (org-onit--clock-out)))
 
 (defun org-onit--post-action (&optional switched)
   "A combined action of clock-out and clock-in.
@@ -294,6 +292,12 @@ STATE should be one of the symbols listed in the docstring of
   "Clock-in and adding `org-onit-doing-tag' tag."
   (org-clock-in)
   (org-toggle-tag org-onit-doing-tag 'on))
+
+(defun org-onit--clock-out ()
+  "Clock-out and remove `org-onit-doing-tag' tag."
+  (when (org-clocking-p)
+    (org-clock-out))
+  (org-onit--remove-tag))
 
 (defun org-onit--backup-title-format ()
   "Backup `the-title-format'."
@@ -394,9 +398,7 @@ This command also switches `org-clock-in' and `org-clock-out'."
         (org-back-to-heading t)
         (cond
          ((org-onit--tagged-p)
-          (when (org-clocking-p)
-            (org-clock-out))
-          (org-toggle-tag org-onit-doing-tag 'off))
+          (org-onit--clock-out))
          (t
           (if (org-entry-is-done-p)
               (if (memq (plist-get org-onit-toggle-options :wakeup)
