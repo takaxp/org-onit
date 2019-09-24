@@ -67,7 +67,7 @@ If you apply the above recommended keybindings, then just type =<f11>= in an org
 
 - calling =org-onit-toggle-doing= if the task is not ~DONE~
 - calling =org-onit-toggle-doing= at any headings if =:wakeup= of =org-onit-toggle-options= is =doing= or =both=
-- unfolding a heading if =org-onit-use-unfold-as-doing= is non-nil
+- unfolding a heading if =:unfold= of =org-onit-toggle-options= is non-nil
 
 **** clock-out triggers
 
@@ -109,17 +109,17 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
  - org-onit-toggle-options
    - =:wakeup= allows switching to =org-clock-in= when the heading is DONE.
    - =:nostate= allows switching to =org-clock-in= in any headings except headings in TODO
-   - Default: (=:wakeup= nil =:nostate= nil)
-     - Both properties can take =doing=, =auto=, =both=, and =nil=
-     - If =doing= is specified, the option will be used in =org-onit-toggle-doing=
-     - If =auto= is specified, the option will be used in =org-onit-toggle-auto=
-     - If =both= is specified, the option will be used in =org-onit-toggle-doing= and =org-onit-toggle-auto=
+   - =:unfold= allows switching to =org-clock-in= when unfolding a heading
+   - Default: (=:wakeup= nil =:nostate= nil =:unfold= nil)
+     - =:wakeup= and =:nostate= can take =doing=, =auto=, =both=, and =nil=
+       - If =doing= is specified, the option will be used in =org-onit-toggle-doing=
+       - If =auto= is specified, the option will be used in =org-onit-toggle-auto=
+       - If =both= is specified, the option will be used in =org-onit-toggle-doing= and =org-onit-toggle-auto=
+     - =:unfold= can take =t= or =nil=
+       - But =:wakeup= and =:nostate= are given priority over =:unfold=
  - org-onit-encure-clock-out-when-exit
    - Call =org-clock-out= when killing Emacs if =org-clock-persis= is not =history= or =nil=
    - Default: t
- - org-onit-use-unfold-as-doing
-   - Call =org-clock-in= when a heading is unfold, not clocking, and having a todo state
-   - Default: nil
 
 ** Hooks
 
@@ -137,6 +137,9 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
    (add-hook 'org-onit-after-jump-hook #'my-onit-reveal)
    #+end_src
 * ChangeLog
+ - 1.0.3 (2019-09-24)
+   - [improved] =org-onit-use-unfold-as-doing= is integrated to =org-onit-toggle-options=
+   - [deprecated] =org-onit-use-unfold-as-doing=
  - 1.0.2 (2019-09-12)
    - [new] =org-onit-toggle-options= is introduced
    - [improved] =org-clock-in-switch-to-state= is reflected to =org-onit-todo-state=
