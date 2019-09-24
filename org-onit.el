@@ -4,7 +4,7 @@
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 1.0.2
+;; Version: 1.0.3
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -85,11 +85,15 @@
   :type 'string
   :group 'org-onit)
 
-(defcustom org-onit-toggle-options '(:wakeup nil :nostate nil)
+(defcustom org-onit-toggle-options '(:wakeup nil :nostate nil :unfold nil)
   "Combined options for `org-onit-toggle-doing' and `org-onit-toggle-auto'.
-Both properties can take {doing, auto, both, nil}.
+
+Following two options can take {doing, auto, both, nil}:
 :wakeup    If non-nil, start clocking even if the task is marked DONE.
-:nostate   If non-nil, clock the task even if it doesn't have todo state."
+:nostate   If non-nil, clock the task even if it doesn't have todo state.
+
+Following option can take {t, nil}:
+:unfold    If non-nil, try to clock-in when unfolding a subturee."
   :type 'plist
   :group 'org-onit)
 
@@ -288,7 +292,7 @@ SELECT is the optional argument of `org-clock-goto'."
   "Clock-in when a heading is switched to unfold and not clocking.
 STATE should be one of the symbols listed in the docstring of
 `org-cycle-hook'."
-  (when (and org-onit-use-unfold-as-doing
+  (when (and (plist-get org-onit-toggle-options :unfold)
              (not (org-clocking-p))
              (memq state '(children subtree)))
     (unless org-onit-mode
@@ -319,11 +323,14 @@ STATE should be one of the symbols listed in the docstring of
   "Setup."
   ;; This section will be removed based on the availability of `org-onit-wakeup-done' and `org-onit-include-no-state-heading'
   (when (and (not (plist-get org-onit-toggle-options :wakeup))
-             (not (plist-get org-onit-toggle-options :nostate)))
+             (not (plist-get org-onit-toggle-options :nostate))
+             (not (plist-get org-onit-toggle-options :unfold)))
     (plist-put org-onit-toggle-options
                :wakeup (when org-onit-wakeup-done 'doing))
     (plist-put org-onit-toggle-options
-               :nostate (when org-onit-include-no-state-heading 'auto)))
+               :nostate (when org-onit-include-no-state-heading 'auto))
+    (plist-put org-onit-toggle-options
+               :unfold org-onit-use-unfold-as-doing)))
 
   (org-onit--backup-title-format)
   (advice-add 'org-clock-goto :around #'org-onit--clock-goto)
@@ -444,7 +451,7 @@ Recommended settings for `org-clock':
   (setq org-clock-clocked-in-display 'frame-title) ;; or 'both
   (setq org-clock-frame-title-format
     '((:eval (format \"%s\" org-mode-line-string))))
-
+p
 Recommended keybindings:
   (global-set-key (kbd \"C-<f11>\") 'org-clock-goto)
   (define-key org-mode-map (kbd \"<f11>\") 'org-onit-toggle-doing)
