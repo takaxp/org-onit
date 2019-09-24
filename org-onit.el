@@ -93,7 +93,10 @@ Following two options can take {doing, auto, both, nil}:
 :nostate   If non-nil, clock the task even if it doesn't have todo state.
 
 Following option can take {t, nil}:
-:unfold    If non-nil, try to clock-in when unfolding a subturee."
+:unfold    If non-nil, try to clock-in when unfolding a subturee.
+
+Note - :wakeup and :nonstate options are given priority over :unfold.
+"
   :type 'plist
   :group 'org-onit)
 
@@ -308,8 +311,9 @@ STATE should be one of the symbols listed in the docstring of
 
 (defun org-onit--clock-out ()
   "Clock-out and remove `org-onit-doing-tag' tag."
-  (when (org-clocking-p)
-    (org-clock-out)))
+  (if (org-clocking-p)
+      (org-clock-out)
+    (org-onit--remove-tag)))
 
 (defun org-onit--backup-title-format ()
   "Backup `the-title-format'."
@@ -451,7 +455,7 @@ Recommended settings for `org-clock':
   (setq org-clock-clocked-in-display 'frame-title) ;; or 'both
   (setq org-clock-frame-title-format
     '((:eval (format \"%s\" org-mode-line-string))))
-p
+
 Recommended keybindings:
   (global-set-key (kbd \"C-<f11>\") 'org-clock-goto)
   (define-key org-mode-map (kbd \"<f11>\") 'org-onit-toggle-doing)
