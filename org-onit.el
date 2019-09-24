@@ -330,7 +330,7 @@ STATE should be one of the symbols listed in the docstring of
     (plist-put org-onit-toggle-options
                :nostate (when org-onit-include-no-state-heading 'auto))
     (plist-put org-onit-toggle-options
-               :unfold org-onit-use-unfold-as-doing)))
+               :unfold org-onit-use-unfold-as-doing))
 
   (org-onit--backup-title-format)
   (advice-add 'org-clock-goto :around #'org-onit--clock-goto)
