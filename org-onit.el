@@ -85,7 +85,8 @@ Following two options can take {doing, auto, both, nil}:
 Following option can take {t, nil}:
 :unfold    If non-nil, try to clock-in when unfolding a subturee.
 
-Note - :wakeup and :nonstate options are given priority over :unfold."
+Note - :wakeup and :nonstate options are given priority over :unfold.
+       :nostate both or auto with :unfold t will start clock-in."
   :type 'plist
   :group 'org-onit)
 
