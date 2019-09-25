@@ -68,6 +68,7 @@ If you apply the above recommended keybindings, then just type =<f11>= in an org
 
 - calling =org-onit-toggle-doing= if the task is not ~DONE~
 - calling =org-onit-toggle-doing= at any headings if =:wakeup= of =org-onit-toggle-options= is =doing= or =both=
+- unfolding a heading if =:unfold= of =org-onit-toggle-options= is non-nil
 
 **** clock-out triggers
 
@@ -89,7 +90,6 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
 - visiting a heading if the task is not ~DONE~
 - visiting a heading if =:nostate= of =org-onit-toggle-options= is =auto= or =both= and the task is not ~DONE~
 - making the task not ~DONE~
-- unfolding a heading if =:unfold= of =org-onit-toggle-options= is non-nil and =:nostate= of =org-onit-toggle-options= is =auto= or =both=
 
 **** clock-out triggers
 

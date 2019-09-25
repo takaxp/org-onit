@@ -85,8 +85,7 @@ Following two options can take {doing, auto, both, nil}:
 Following option can take {t, nil}:
 :unfold    If non-nil, try to clock-in when unfolding a subturee.
 
-Note - :wakeup and :nonstate options are given priority over :unfold.
-       :nostate both or auto with :unfold t will start clock-in."
+Note - :wakeup and :nonstate options are given priority over :unfold."
   :type 'plist
   :group 'org-onit)
 
@@ -302,12 +301,19 @@ SELECT is the optional argument of `org-clock-goto'."
   "Clock-in when a heading is switched to unfold and not clocking.
 STATE should be one of the symbols listed in the docstring of
 `org-cycle-hook'."
-  (when (and (plist-get org-onit-toggle-options :unfold)
-             (not (org-clocking-p))
-             (memq state '(children subtree)))
+  (when (and (not (org-clocking-p))
+             (memq state '(children subtree))
+             (plist-get org-onit-toggle-options :unfold)
+             (or (and (not (org-get-todo-state))
+                      (plist-get org-onit-toggle-options :nostate))
+                 (and (org-entry-is-done-p)
+                      (plist-get org-onit-toggle-options :wakeup))
+                 (org-entry-is-todo-p)))
     (unless org-onit-mode
       (org-onit-mode 1))
-    (org-onit--post-action t)))
+    (org-onit--clock-in)
+    (org-cycle-hide-drawers 'children)
+    (org-reveal)))
 
 (defun org-onit--clock-in ()
   "Clock-in and adding `org-onit-doing-tag' tag."
