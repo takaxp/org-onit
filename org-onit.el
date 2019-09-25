@@ -1,4 +1,4 @@
-;;; org-onit.el --- Record your task all the time -*- lexical-binding: t; -*-
+;;; org-onit.el --- Easy org-clock-in and org-clock-out -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2019 Takaaki ISHIKAWA
 
