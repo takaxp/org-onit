@@ -112,8 +112,15 @@ This flag is utilized for `org-onit-toggle-auto'."
   :type 'boolean
   :group 'org-onit)
 
+(defcustom org-onit-keep-no-state t
+  "If non-nil, do not change TODO state even when :nostat is non-nil."
+  :type 'boolean
+  :group 'org-onit)
+
 (defcustom org-onit-encure-clock-out-when-exit t
-  "If non-nil, `org-clock-out' will be called when killing Emacs.")
+  "If non-nil, `org-clock-out' will be called when killing Emacs."
+  :type 'boolean
+  :group 'org-onit)
 
 (defcustom org-onit-use-unfold-as-doing nil
   "If non-nil, clock-in when a heading is changed to unfold and not clocking."
@@ -304,7 +311,8 @@ STATE should be one of the symbols listed in the docstring of
 
 (defun org-onit--clock-in ()
   "Clock-in and adding `org-onit-doing-tag' tag."
-  (unless (org-entry-is-todo-p)
+  (when (or (org-entry-is-done-p)
+            (not org-onit-keep-no-state))
     (org-todo org-onit-todo-state))
   (org-clock-in)
   (org-toggle-tag org-onit-doing-tag 'on))
