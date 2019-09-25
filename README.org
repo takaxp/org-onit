@@ -120,6 +120,10 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
  - org-onit-encure-clock-out-when-exit
    - Call =org-clock-out= when killing Emacs if =org-clock-persis= is not =history= or =nil=
    - Default: t
+ - org-onit-keep-no-state
+   - If non-nil, allow clocking in but keep the heading TODO state none
+   - If nil and =:unfold= of =org-onit-toggle-options= is specified non-nil, then the subtree will be changed to TODO heading state and clocked-in
+   - Default: t
 
 ** Hooks
 
@@ -137,6 +141,8 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
    (add-hook 'org-onit-after-jump-hook #'my-onit-reveal)
    #+end_src
 * ChangeLog
+ - 1.0.4 (2019-09-25)
+   - [new] =org-onit-keep-no-state= is added
  - 1.0.3 (2019-09-24)
    - [improved] =org-onit-use-unfold-as-doing= is integrated to =org-onit-toggle-options=
    - [deprecated] =org-onit-use-unfold-as-doing=

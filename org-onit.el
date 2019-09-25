@@ -4,7 +4,7 @@
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 1.0.3
+;; Version: 1.0.4
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -95,8 +95,7 @@ Following two options can take {doing, auto, both, nil}:
 Following option can take {t, nil}:
 :unfold    If non-nil, try to clock-in when unfolding a subturee.
 
-Note - :wakeup and :nonstate options are given priority over :unfold.
-"
+Note - :wakeup and :nonstate options are given priority over :unfold."
   :type 'plist
   :group 'org-onit)
 
