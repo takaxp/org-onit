@@ -75,16 +75,6 @@
   :type 'string
   :group 'org-onit)
 
-(defcustom org-onit-bookmark "org-onit-last-clock-in"
-  "Bookmark for the heading last clock-in."
-  :type 'string
-  :group 'org-onit)
-
-(defcustom org-onit-bookmark-anchor "org-onit-anchor"
-  "Bookmark to store an anchor position."
-  :type 'string
-  :group 'org-onit)
-
 (defcustom org-onit-toggle-options '(:wakeup nil :nostate nil :unfold nil)
   "Combined options for `org-onit-toggle-doing' and `org-onit-toggle-auto'.
 
@@ -99,18 +89,6 @@ Note - :wakeup and :nonstate options are given priority over :unfold."
   :type 'plist
   :group 'org-onit)
 
-(defcustom org-onit-wakeup-done nil
-  "If non-nil, start clocking even if the task is marked done.
-This flag is not utilized for `org-onit-toggle-auto'."
-  :type 'boolean
-  :group 'org-onit)
-
-(defcustom org-onit-include-no-state-heading nil
-  "If non-nil, clock the task even if it doesn't have todo state.
-This flag is utilized for `org-onit-toggle-auto'."
-  :type 'boolean
-  :group 'org-onit)
-
 (defcustom org-onit-keep-no-state t
   "If non-nil, do not change TODO state even when :nostat is non-nil."
   :type 'boolean
@@ -118,11 +96,6 @@ This flag is utilized for `org-onit-toggle-auto'."
 
 (defcustom org-onit-encure-clock-out-when-exit t
   "If non-nil, `org-clock-out' will be called when killing Emacs."
-  :type 'boolean
-  :group 'org-onit)
-
-(defcustom org-onit-use-unfold-as-doing nil
-  "If non-nil, clock-in when a heading is changed to unfold and not clocking."
   :type 'boolean
   :group 'org-onit)
 
@@ -150,6 +123,33 @@ This flag is utilized for `org-onit-toggle-auto'."
   '("▁" "▂" "▃" "▄" "▅" "▆" "▇" "▇" "▇" "▆" "▅" "▄" "▃" "▂" "▁" "▁" "▁")
   "List of signs to show now clocking in a heading."
   :type 'list
+  :group 'org-onit)
+
+(defcustom org-onit-bookmark "org-onit-last-clock-in"
+  "Bookmark for the heading last clock-in."
+  :type 'string
+  :group 'org-onit)
+
+(defcustom org-onit-bookmark-anchor "org-onit-anchor"
+  "Bookmark to store an anchor position."
+  :type 'string
+  :group 'org-onit)
+
+(defcustom org-onit-wakeup-done nil
+  "[deprecated] If non-nil, start clocking even if the task is marked done.
+This flag is not utilized for `org-onit-toggle-auto'."
+  :type 'boolean
+  :group 'org-onit)
+
+(defcustom org-onit-include-no-state-heading nil
+  "[deprecated] If non-nil, clock the task even if it doesn't have todo state.
+This flag is utilized for `org-onit-toggle-auto'."
+  :type 'boolean
+  :group 'org-onit)
+
+(defcustom org-onit-use-unfold-as-doing nil
+  "[deprecated] If non-nil, clock-in when a heading is changed to unfold and not clocking."
+  :type 'boolean
   :group 'org-onit)
 
 ;; internal functions
