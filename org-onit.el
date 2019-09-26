@@ -4,7 +4,7 @@
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 1.0.4
+;; Version: 1.0.5
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -297,24 +297,6 @@ SELECT is the optional argument of `org-clock-goto'."
     (org-onit--clock-out)
     (save-some-buffers t)))
 
-(defun org-onit--clock-in-when-unfolded (state)
-  "Clock-in when a heading is switched to unfold and not clocking.
-STATE should be one of the symbols listed in the docstring of
-`org-cycle-hook'."
-  (when (and (not (org-clocking-p))
-             (memq state '(children subtree))
-             (plist-get org-onit-toggle-options :unfold)
-             (or (and (not (org-get-todo-state))
-                      (plist-get org-onit-toggle-options :nostate))
-                 (and (org-entry-is-done-p)
-                      (plist-get org-onit-toggle-options :wakeup))
-                 (org-entry-is-todo-p)))
-    (unless org-onit-mode
-      (org-onit-mode 1))
-    (org-onit--clock-in)
-    (org-cycle-hide-drawers 'children)
-    (org-reveal)))
-
 (defun org-onit--clock-in ()
   "Clock-in and adding `org-onit-doing-tag' tag."
   (when (or (org-entry-is-done-p)
@@ -352,7 +334,7 @@ STATE should be one of the symbols listed in the docstring of
 
   (org-onit--backup-title-format)
   (advice-add 'org-clock-goto :around #'org-onit--clock-goto)
-  (add-hook 'org-cycle-hook #'org-onit--clock-in-when-unfolded)
+  (add-hook 'org-cycle-hook #'org-onit-clock-in-when-unfold)
   (add-hook 'org-after-todo-state-change-hook #'org-onit--remove-tag-not-todo)
   (add-hook 'kill-emacs-hook #'org-onit-clock-out-when-kill-emacs)
   (add-hook 'org-clock-in-hook #'org-onit--bookmark-set)
@@ -369,7 +351,7 @@ STATE should be one of the symbols listed in the docstring of
   (setq org-onit--clock-in-last-pos nil)
   (setq org-onit--anchor-last-pos nil)
   (advice-remove 'org-clock-goto #'org-onit--clock-goto)
-  (remove-hook 'org-cycle-hook #'org-onit--clock-in-when-unfolded)
+  (remove-hook 'org-cycle-hook #'org-onit-clock-in-when-unfold)
   (remove-hook 'org-after-todo-state-change-hook
                #'org-onit--remove-tag-not-todo)
   (remove-hook 'kill-emacs-hook #'org-onit-clock-out-when-kill-emacs)
@@ -445,6 +427,25 @@ This command also switches `org-clock-in' and `org-clock-out'."
     (org-reveal)))
 
 ;;;###autoload
+(defun org-onit-clock-in-when-unfold (state)
+  "Clock-in when a heading is switched to unfold and not clocking.
+STATE should be one of the symbols listed in the docstring of
+`org-cycle-hook'."
+  (when (and (not (org-clocking-p))
+             (memq state '(children subtree))
+             (plist-get org-onit-toggle-options :unfold)
+             (or (and (org-entry-is-done-p)
+                      (plist-get org-onit-toggle-options :wakeup))
+                 (and (not (org-get-todo-state))
+                      (plist-get org-onit-toggle-options :nostate))
+                 (org-entry-is-todo-p)))
+    (unless org-onit-mode
+      (org-onit-mode 1))
+    (org-onit--clock-in)
+    (org-cycle-hide-drawers 'children)
+    (org-reveal)))
+
+;;;###autoload
 (define-minor-mode org-onit-mode
   "
 This minor mode expands `org-clock-in', `org-clock-out' and `org-clock-goto'
@@ -483,9 +484,6 @@ Recommended keybindings:
   (if org-onit-mode
       (org-onit--setup)
     (org-onit--abort)))
-
-;; init
-(add-hook 'org-cycle-hook #'org-onit--clock-in-when-unfolded)
 
 (provide 'org-onit)
 

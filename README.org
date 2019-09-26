@@ -21,7 +21,6 @@ If you use ~package.el~ or other package manager, no necessary to add =(require 
 It is recommended to install [[https://github.com/alphapapa/org-bookmark-heading][org-bookmark-heading]] because a normal jump by built-in ~bookmark.el~ is not sufficiently accurate for org buffers. [[https://github.com/alphapapa/org-bookmark-heading][org-bookmark-heading]] provides more precise jumping capability by adding ID property to each org mode heading. ~org-onit.el~ will use [[https://github.com/alphapapa/org-bookmark-heading][org-bookmark-heading]] if available but not mandatory.
 
 * Recommend settings
-
 ** Highly recommended
 
 #+begin_src emacs-lisp
@@ -45,7 +44,8 @@ You can freely arrange =org-clock-frame-title-format=. If you install [[https://
 
 #+begin_src emacs-lisp
 (with-eval-after-load "org"
-  (add-to-list 'org-tag-faces '("Doing" :foreground "#FF0000")))
+  (add-to-list 'org-tag-faces '("Doing" :foreground "#FF0000"))
+  (add-hook 'org-cycle-hook #'org-onit-clock-in-when-unfold))
 
 (with-eval-after-load "org-clock"
   (setq org-clock-clocked-in-display 'frame-title) ;; or 'both
@@ -142,6 +142,8 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
    (add-hook 'org-onit-after-jump-hook #'my-onit-reveal)
    #+end_src
 * ChangeLog
+ - 1.0.5 (2019-09-26)
+   - [new] =org-onit-clock-in-when-unfold= is now public function
  - 1.0.4 (2019-09-25)
    - [new] =org-onit-keep-no-state= is added
  - 1.0.3 (2019-09-24)
