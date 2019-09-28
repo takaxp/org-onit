@@ -435,9 +435,11 @@ STATE should be one of the symbols listed in the docstring of
              (memq state '(children subtree))
              (plist-get org-onit-toggle-options :unfold)
              (or (and (org-entry-is-done-p)
-                      (plist-get org-onit-toggle-options :wakeup))
+                      (memq (plist-get org-onit-toggle-options :wakeup)
+                            '(doing both)))
                  (and (not (org-get-todo-state))
-                      (plist-get org-onit-toggle-options :nostate))
+                      (memq (plist-get org-onit-toggle-options :nostate)
+                            '(doing both)))
                  (org-entry-is-todo-p)))
     (unless org-onit-mode
       (org-onit-mode 1))
