@@ -4,7 +4,7 @@
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 1.0.5
+;; Version: 1.0.6
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -78,6 +78,8 @@
 (defcustom org-onit-toggle-options '(:wakeup nil :nostate nil :unfold nil)
   "Combined options for `org-onit-toggle-doing' and `org-onit-toggle-auto'.
 
+This variable will be buffer local.
+
 Following two options can take {doing, auto, both, nil}:
 :wakeup    If non-nil, start clocking even if the task is marked DONE.
 :nostate   If non-nil, clock the task even if it doesn't have todo state.
@@ -88,6 +90,7 @@ Following option can take {t, nil}:
 Note - :wakeup and :nonstate options are given priority over :unfold."
   :type 'plist
   :group 'org-onit)
+;;;###autoload (put 'org-onit-toggle-options 'safe-local-variable 'stringp)
 
 (defcustom org-onit-keep-no-state t
   "If non-nil, do not change TODO state even when :nostat is non-nil."
@@ -321,6 +324,9 @@ SELECT is the optional argument of `org-clock-goto'."
 
 (defun org-onit--setup ()
   "Setup."
+  ;; For buffer-local
+  (setq org-onit-toggle-options org-onit-toggle-options)
+
   ;; This section will be removed based on the availability of `org-onit-wakeup-done' and `org-onit-include-no-state-heading'
   (when (and (not (plist-get org-onit-toggle-options :wakeup))
              (not (plist-get org-onit-toggle-options :nostate))
