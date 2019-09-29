@@ -108,6 +108,7 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
    - Allow switching to =org-clock-in= in any headings except headings in TODO when =org-onit-toggle-auto= is used
    - Default: nil
  - org-onit-toggle-options
+   - This variable is buffer-local. Please use =setq-default= or =custom-set-variables= in your init.el.
    - =:wakeup= allows switching to =org-clock-in= when the heading is DONE.
    - =:nostate= allows switching to =org-clock-in= in any headings except headings in TODO
    - =:unfold= allows switching to =org-clock-in= when unfolding a heading
@@ -142,6 +143,8 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
    (add-hook 'org-onit-after-jump-hook #'my-onit-reveal)
    #+end_src
 * ChangeLog
+ - 1.0.6 (2019-09-29)
+   - [improved] Make =org-onit-toggle-options= buffer local
  - 1.0.5 (2019-09-26)
    - [new] =org-onit-clock-in-when-unfold= is now public function
  - 1.0.4 (2019-09-25)

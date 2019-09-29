@@ -325,7 +325,7 @@ SELECT is the optional argument of `org-clock-goto'."
 (defun org-onit--setup ()
   "Setup."
   ;; For buffer-local
-  (setq org-onit-toggle-options org-onit-toggle-options)
+  (make-local-variable 'org-onit-toggle-options)
 
   ;; This section will be removed based on the availability of `org-onit-wakeup-done' and `org-onit-include-no-state-heading'
   (when (and (not (plist-get org-onit-toggle-options :wakeup))
