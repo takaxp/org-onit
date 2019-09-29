@@ -4,7 +4,7 @@
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 1.0.6
+;; Version: 1.0.7
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -75,7 +75,7 @@
   :type 'string
   :group 'org-onit)
 
-(defcustom org-onit-toggle-options '(:wakeup nil :nostate nil :unfold nil)
+(defcustom org-onit-basic-options '(:wakeup nil :nostate nil :unfold nil)
   "Combined options for `org-onit-toggle-doing' and `org-onit-toggle-auto'.
 
 This variable will be buffer local.
@@ -90,7 +90,8 @@ Following option can take {t, nil}:
 Note - :wakeup and :nonstate options are given priority over :unfold."
   :type 'plist
   :group 'org-onit)
-;;;###autoload (put 'org-onit-toggle-options 'safe-local-variable 'stringp)
+;;;###autoload (put 'org-onit-basic-options 'safe-local-variable 'stringp)
+(define-obsolete-variable-alias 'org-onit-toggle-options 'org-onit-basic-options "1.2.0")
 
 (defcustom org-onit-keep-no-state t
   "If non-nil, do not change TODO state even when :nostat is non-nil."
@@ -143,17 +144,20 @@ Note - :wakeup and :nonstate options are given priority over :unfold."
 This flag is not utilized for `org-onit-toggle-auto'."
   :type 'boolean
   :group 'org-onit)
+(make-obsolete-variable 'org-onit-wakeup-done 'org-onit-basic-options "1.2.0")
 
 (defcustom org-onit-include-no-state-heading nil
   "[deprecated] If non-nil, clock the task even if it doesn't have todo state.
 This flag is utilized for `org-onit-toggle-auto'."
   :type 'boolean
   :group 'org-onit)
+(make-obsolete-variable 'org-onit-include-no-state-heading 'org-onit-basic-options "1.2.0")
 
 (defcustom org-onit-use-unfold-as-doing nil
   "[deprecated] If non-nil, clock-in when a heading is changed to unfold and not clocking."
   :type 'boolean
   :group 'org-onit)
+(make-obsolete-variable 'org-onit-use-unfold-as-doing 'org-onit-basic-options "1.2.0")
 
 ;; internal functions
 
@@ -207,9 +211,9 @@ This flag is utilized for `org-onit-toggle-auto'."
   "Return non-nil if the heading is valid task for clock-in."
   (cond
    ((org-entry-is-done-p)
-    (memq (plist-get org-onit-toggle-options :wakeup) '(auto both)))
+    (memq (plist-get org-onit-basic-options :wakeup) '(auto both)))
    ((not (org-get-todo-state))
-    (memq (plist-get org-onit-toggle-options :nostate) '(auto both)))
+    (memq (plist-get org-onit-basic-options :nostate) '(auto both)))
    ((org-entry-is-todo-p) t)
    (t nil)))
 
@@ -325,17 +329,17 @@ SELECT is the optional argument of `org-clock-goto'."
 (defun org-onit--setup ()
   "Setup."
   ;; For buffer-local
-  (make-local-variable 'org-onit-toggle-options)
+  (make-local-variable 'org-onit-basic-options)
 
   ;; This section will be removed based on the availability of `org-onit-wakeup-done' and `org-onit-include-no-state-heading'
-  (when (and (not (plist-get org-onit-toggle-options :wakeup))
-             (not (plist-get org-onit-toggle-options :nostate))
-             (not (plist-get org-onit-toggle-options :unfold)))
-    (plist-put org-onit-toggle-options
+  (when (and (not (plist-get org-onit-basic-options :wakeup))
+             (not (plist-get org-onit-basic-options :nostate))
+             (not (plist-get org-onit-basic-options :unfold)))
+    (plist-put org-onit-basic-options
                :wakeup (when org-onit-wakeup-done 'doing))
-    (plist-put org-onit-toggle-options
+    (plist-put org-onit-basic-options
                :nostate (when org-onit-include-no-state-heading 'auto))
-    (plist-put org-onit-toggle-options
+    (plist-put org-onit-basic-options
                :unfold org-onit-use-unfold-as-doing))
 
   (org-onit--backup-title-format)
@@ -384,6 +388,29 @@ SELECT is the optional argument of `org-clock-goto'."
              (org-onit--rotate-list
               org-onit-clocking-sign-alist))))
 
+(defun org-onit-update-options (options)
+  "Update `org-onit-basic-options' with OPTIONS.
+This function will update `org-onit-basic-options' with provaided properties.
+Unprovided property will not change the original value."
+  (setq org-onit-basic-options
+        (read
+         (concat
+          "(:wakeup "
+          (format "%S"
+                  (if (plist-member options :wakeup)
+                      (plist-get options :wakeup)
+                    (plist-get org-onit-basic-options :wakeup)))
+          " :nostate "
+          (format "%S"
+                  (if (plist-member options :nostate)
+                      (plist-get options :nostate)
+                    (plist-get org-onit-basic-options :nostate)))
+          " :unfold "
+          (format "%S)"
+                  (if (plist-member options :unfold)
+                      (plist-get options :unfold)
+                    (plist-get org-onit-basic-options :unfold)))))))
+
 ;;;###autoload
 (defun org-onit-toggle-auto ()
   "Toggle auto clocking."
@@ -420,11 +447,11 @@ This command also switches `org-clock-in' and `org-clock-out'."
          ((org-onit--tagged-p)
           (org-onit--clock-out))
          ((org-entry-is-done-p)
-          (if (memq (plist-get org-onit-toggle-options :wakeup) '(doing both))
+          (if (memq (plist-get org-onit-basic-options :wakeup) '(doing both))
               (org-onit--clock-in)
             (message "Prevent `org-clock-in'. And not switching to TODO.")))
          ((not (org-get-todo-state))
-          (if (memq (plist-get org-onit-toggle-options :nostate) '(doing both))
+          (if (memq (plist-get org-onit-basic-options :nostate) '(doing both))
               (org-onit--clock-in)
             (message "Prevent `org-clock-in'. Heading has no todo state.")))
          ((org-entry-is-todo-p)
@@ -439,12 +466,12 @@ STATE should be one of the symbols listed in the docstring of
 `org-cycle-hook'."
   (when (and (not (org-clocking-p))
              (memq state '(children subtree))
-             (plist-get org-onit-toggle-options :unfold)
+             (plist-get org-onit-basic-options :unfold)
              (or (and (org-entry-is-done-p)
-                      (memq (plist-get org-onit-toggle-options :wakeup)
+                      (memq (plist-get org-onit-basic-options :wakeup)
                             '(doing both)))
                  (and (not (org-get-todo-state))
-                      (memq (plist-get org-onit-toggle-options :nostate)
+                      (memq (plist-get org-onit-basic-options :nostate)
                             '(doing both)))
                  (org-entry-is-todo-p)))
     (unless org-onit-mode

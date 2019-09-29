@@ -67,8 +67,8 @@ If you apply the above recommended keybindings, then just type =<f11>= in an org
 =org-clock-in= will be called when:
 
 - calling =org-onit-toggle-doing= if the task is not ~DONE~
-- calling =org-onit-toggle-doing= at any headings if =:wakeup= of =org-onit-toggle-options= is =doing= or =both=
-- unfolding a heading if =:unfold= of =org-onit-toggle-options= is non-nil
+- calling =org-onit-toggle-doing= at any headings if =:wakeup= of =org-onit-basic-options= is =doing= or =both=
+- unfolding a heading if =:unfold= of =org-onit-basic-options= is non-nil
 
 **** clock-out triggers
 
@@ -88,7 +88,7 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
 =org-clock-in= will be called when:
 
 - visiting a heading if the task is not ~DONE~
-- visiting a heading if =:nostate= of =org-onit-toggle-options= is =auto= or =both= and the task is not ~DONE~
+- visiting a heading if =:nostate= of =org-onit-basic-options= is =auto= or =both= and the task is not ~DONE~
 - making the task not ~DONE~
 
 **** clock-out triggers
@@ -96,18 +96,18 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
 =org-clock-out= will be called when:
 
 - switching to other headings if the task has a todo state (e.g. ~TODO~)
-- switching to other headings if =:nostate= of =org-onit-toggle-options== is =auto= or =both= and the task is not ~DONE~
+- switching to other headings if =:nostate= of =org-onit-basic-options== is =auto= or =both= and the task is not ~DONE~
 - making the task ~DONE~
 - calling =org-onit-toggle-doing=
 
 ** Options
- - org-onit-wakeup-done (~deprecated~, use =org-onit-toggle-options=)
+ - org-onit-wakeup-done (~deprecated~, use =org-onit-basic-options=)
    - Allow switching to =org-clock-in= by =org-onit-toggle-doing= when the heading is DONE.
    - Default: nil
- - org-onit-include-no-state-heading (~deprecated~, use =org-onit-toggle-options=)
+ - org-onit-include-no-state-heading (~deprecated~, use =org-onit-basic-options=)
    - Allow switching to =org-clock-in= in any headings except headings in TODO when =org-onit-toggle-auto= is used
    - Default: nil
- - org-onit-toggle-options
+ - org-onit-basic-options
    - This variable is buffer-local. Please use =setq-default= or =custom-set-variables= in your init.el.
    - =:wakeup= allows switching to =org-clock-in= when the heading is DONE.
    - =:nostate= allows switching to =org-clock-in= in any headings except headings in TODO
@@ -124,8 +124,17 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
    - Default: t
  - org-onit-keep-no-state
    - If non-nil, allow clocking in but keep the heading TODO state none
-   - If nil and =:nostate= of =org-onit-toggle-options= is specified as non-nil, then the subtree will be changed to TODO heading state and clock-in
+   - If nil and =:nostate= of =org-onit-basic-options= is specified as non-nil, then the subtree will be changed to TODO heading state and clock-in
    - Default: t
+
+** Helpers
+
+ - org-onit-update-options
+   #+begin_src emacs-lisp
+   org-onit-basic-options ;; (:wakeup nil :nostate nil :unfold nil)
+   (org-onit-update-options '(:nostate doing :unfold t)) ;; update the local variable
+   org-onit-basic-options ;; (:wakeup nil :nostate doing :unfold t)
+   #+end_src
 
 ** Hooks
 
@@ -143,6 +152,9 @@ Use =M-x org-onit-toggle-auto=. Toggling =org-clock-in= and =org-clock-out= will
    (add-hook 'org-onit-after-jump-hook #'my-onit-reveal)
    #+end_src
 * ChangeLog
+ - 1.0.7 (2019-09-30)
+   - [new] =org-onit-update-options= is added to update =org-onit-basic-options=
+   - [deprecated] =org-onit-toggle-options= will be =org-onit-basic-options=
  - 1.0.6 (2019-09-29)
    - [improved] Make =org-onit-toggle-options= buffer local
  - 1.0.5 (2019-09-26)
