@@ -388,6 +388,7 @@ SELECT is the optional argument of `org-clock-goto'."
              (org-onit--rotate-list
               org-onit-clocking-sign-alist))))
 
+;;;###autoload
 (defun org-onit-update-options (options)
   "Update `org-onit-basic-options' with OPTIONS.
 This function will update `org-onit-basic-options' with provaided properties.
