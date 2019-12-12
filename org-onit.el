@@ -4,7 +4,7 @@
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 1.0.7
+;; Version: 1.0.8
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -94,7 +94,7 @@ Note - :wakeup and :nonstate options are given priority over :unfold."
 (define-obsolete-variable-alias 'org-onit-toggle-options 'org-onit-basic-options "1.2.0")
 
 (defcustom org-onit-keep-no-state t
-  "If non-nil, do not change TODO state even when :nostat is non-nil."
+  "If non-nil, do not change TODO state even when :nostate of `org-onit-basic-options' is non-nil."
   :type 'boolean
   :group 'org-onit)
 
