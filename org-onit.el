@@ -395,24 +395,24 @@ This function will update `org-onit-basic-options' with provaided properties.
 Unprovided property will not change the original value."
   (unless org-onit-mode
     (org-onit-mode 1))
-  (setq-default org-onit-basic-options
-                (read
-                 (concat
-                  "(:wakeup "
-                  (format "%S"
-                          (if (plist-member options :wakeup)
-                              (plist-get options :wakeup)
-                            (plist-get org-onit-basic-options :wakeup)))
-                  " :nostate "
-                  (format "%S"
-                          (if (plist-member options :nostate)
-                              (plist-get options :nostate)
-                            (plist-get org-onit-basic-options :nostate)))
-                  " :unfold "
-                  (format "%S)"
-                          (if (plist-member options :unfold)
-                              (plist-get options :unfold)
-                            (plist-get org-onit-basic-options :unfold)))))))
+  (setq org-onit-basic-options
+        (read
+         (concat
+          "(:wakeup "
+          (format "%S"
+                  (if (plist-member options :wakeup)
+                      (plist-get options :wakeup)
+                    (plist-get org-onit-basic-options :wakeup)))
+          " :nostate "
+          (format "%S"
+                  (if (plist-member options :nostate)
+                      (plist-get options :nostate)
+                    (plist-get org-onit-basic-options :nostate)))
+          " :unfold "
+          (format "%S)"
+                  (if (plist-member options :unfold)
+                      (plist-get options :unfold)
+                    (plist-get org-onit-basic-options :unfold)))))))
 
 ;;;###autoload
 (defun org-onit-toggle-auto ()
