@@ -393,6 +393,8 @@ SELECT is the optional argument of `org-clock-goto'."
   "Update `org-onit-basic-options' with OPTIONS.
 This function will update `org-onit-basic-options' with provaided properties.
 Unprovided property will not change the original value."
+  (when org-onit-mode
+    (org-onit-mode 1))
   (setq-default org-onit-basic-options
                 (read
                  (concat
@@ -465,6 +467,8 @@ This command also switches `org-clock-in' and `org-clock-out'."
   "Clock-in when a heading is switched to unfold and not clocking.
 STATE should be one of the symbols listed in the docstring of
 `org-cycle-hook'."
+  (unless org-onit-mode
+    (org-onit-mode 1))
   (when (and (not (org-clocking-p))
              (memq state '(children subtree))
              (plist-get org-onit-basic-options :unfold)
