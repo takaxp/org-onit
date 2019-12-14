@@ -1,10 +1,10 @@
 ;;; org-onit.el --- Easy org-clock-in and org-clock-out -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2019 Takaaki ISHIKAWA
+;; Copyright (C) 2019-2020 Takaaki ISHIKAWA
 
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Keywords: convenience
-;; Version: 1.0.8
+;; Version: 1.0.9
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
 ;; Package-Requires: ((emacs "25.1"))
@@ -393,24 +393,24 @@ SELECT is the optional argument of `org-clock-goto'."
   "Update `org-onit-basic-options' with OPTIONS.
 This function will update `org-onit-basic-options' with provaided properties.
 Unprovided property will not change the original value."
-  (setq org-onit-basic-options
-        (read
-         (concat
-          "(:wakeup "
-          (format "%S"
-                  (if (plist-member options :wakeup)
-                      (plist-get options :wakeup)
-                    (plist-get org-onit-basic-options :wakeup)))
-          " :nostate "
-          (format "%S"
-                  (if (plist-member options :nostate)
-                      (plist-get options :nostate)
-                    (plist-get org-onit-basic-options :nostate)))
-          " :unfold "
-          (format "%S)"
-                  (if (plist-member options :unfold)
-                      (plist-get options :unfold)
-                    (plist-get org-onit-basic-options :unfold)))))))
+  (setq-default org-onit-basic-options
+                (read
+                 (concat
+                  "(:wakeup "
+                  (format "%S"
+                          (if (plist-member options :wakeup)
+                              (plist-get options :wakeup)
+                            (plist-get org-onit-basic-options :wakeup)))
+                  " :nostate "
+                  (format "%S"
+                          (if (plist-member options :nostate)
+                              (plist-get options :nostate)
+                            (plist-get org-onit-basic-options :nostate)))
+                  " :unfold "
+                  (format "%S)"
+                          (if (plist-member options :unfold)
+                              (plist-get options :unfold)
+                            (plist-get org-onit-basic-options :unfold)))))))
 
 ;;;###autoload
 (defun org-onit-toggle-auto ()
