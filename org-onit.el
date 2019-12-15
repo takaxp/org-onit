@@ -54,8 +54,8 @@
 ;;; Code:
 
 (require 'org-clock)
-(when (require 'bookmark nil t)
-  (bookmark-maybe-load-default-file))
+(require 'bookmark nil t)
+(bookmark-maybe-load-default-file)
 
 (defgroup org-onit nil
   "Commands to toggle `org-clock-in' and `org-clock-out'."
@@ -168,6 +168,7 @@ This flag is utilized for `org-onit-toggle-auto'."
               (list (car list)))
     list))
 
+(defvar org-onit-mode)
 (defvar org-onit--auto-clocking nil)
 (defvar org-onit--heading nil)
 (defvar org-onit--state nil)
@@ -290,7 +291,7 @@ SELECT is the optional argument of `org-clock-goto'."
       (org-onit--bookmark-jump org-onit-bookmark)) ;; call org-bookmark-jump
      (org-clock-history
       (apply f select)
-      (show-children))
+      (outline-show-children))
      (bm
       (org-onit--bookmark-jump org-onit-bookmark)) ;; use normal bookmark
      (t (message "No clock is found to be shown")))))
@@ -433,7 +434,7 @@ Unprovided property will not change the original value."
            (remove-hook 'post-command-hook #'org-onit--post-action)
            (org-onit--clock-out)
            (run-hooks 'org-onit-stop-autoclock-hook)))
-    (redraw-modeline)))
+    (force-mode-line-update)))
 
 ;;;###autoload
 (defun org-onit-toggle-doing ()
