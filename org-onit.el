@@ -7,7 +7,7 @@
 ;; Version: 1.0.9
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
-;; Package-Requires: ((emacs "25.1"))
+;; Package-Requires: ((emacs "25.1") (org "9.2.4"))
 ;; Twitter: @takaxp
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -54,8 +54,7 @@
 ;;; Code:
 
 (require 'org-clock)
-(when (require 'bookmark nil t)
-  (bookmark-maybe-load-default-file))
+(require 'bookmark)
 
 (defgroup org-onit nil
   "Commands to toggle `org-clock-in' and `org-clock-out'."
@@ -158,6 +157,47 @@ This flag is utilized for `org-onit-toggle-auto'."
   :type 'boolean
   :group 'org-onit)
 (make-obsolete-variable 'org-onit-use-unfold-as-doing 'org-onit-basic-options "1.2.0")
+
+;;;###autoload
+(define-minor-mode org-onit-mode
+  "
+This minor mode expands `org-clock-in', `org-clock-out' and `org-clock-goto'
+to support \"Doing\" functionality. When you toggle a heading, a clock for
+the heading is automatically activated and the heading is tagged with
+`org-doing-tag'. Toggling the same heading, the clock is stopped, and the tag
+is removed. Basically, a single heading tagged with `org-doing-tag' will
+appear in org buffers.
+
+The tagged heading can be easily revisited by calling the extended
+`org-clock-goto' command whether you are editing another heading in any
+org buffers.
+
+An automated `org-clock-in' capability is also provided by this package.
+A heading that you are currently visiting in an org buffer will be
+automatically clocked with executing `org-clock-in'. After you switch to
+other headings, the active clock will be automatically updated without any
+additional actions.
+
+Recommended settings for `org-clock':
+  (setq org-clock-out-remove-zero-time-clocks t) ;; you should apply this.
+  (setq org-clock-clocked-in-display 'frame-title) ;; or 'both
+  (setq org-clock-frame-title-format
+    '((:eval (format \"%s\" org-mode-line-string))))
+
+Recommended keybindings:
+  (global-set-key (kbd \"C-<f11>\") 'org-clock-goto)
+  (define-key org-mode-map (kbd \"<f11>\") 'org-onit-toggle-doing)
+  (define-key org-mode-map (kbd \"M-<f11>\") 'org-onit-toggle-auto)
+  (define-key org-mode-map (kbd \"S-<f11>\") 'org-onit-goto-anchor)
+"
+  :init-value nil
+  :lighter (:eval (org-onit--lighter))
+  :require 'org-clock
+  :group 'org-onit
+  (if org-onit-mode
+      (org-onit--setup)
+    (org-onit--abort)))
+
 
 ;; internal functions
 
@@ -290,7 +330,7 @@ SELECT is the optional argument of `org-clock-goto'."
       (org-onit--bookmark-jump org-onit-bookmark)) ;; call org-bookmark-jump
      (org-clock-history
       (apply f select)
-      (show-children))
+      (org-show-children))
      (bm
       (org-onit--bookmark-jump org-onit-bookmark)) ;; use normal bookmark
      (t (message "No clock is found to be shown")))))
@@ -328,6 +368,9 @@ SELECT is the optional argument of `org-clock-goto'."
 
 (defun org-onit--setup ()
   "Setup."
+  ;; For bookmark.el
+  (bookmark-maybe-load-default-file)  
+  
   ;; For buffer-local
   (make-local-variable 'org-onit-basic-options)
 
@@ -433,7 +476,7 @@ Unprovided property will not change the original value."
            (remove-hook 'post-command-hook #'org-onit--post-action)
            (org-onit--clock-out)
            (run-hooks 'org-onit-stop-autoclock-hook)))
-    (redraw-modeline)))
+    (force-mode-line-update)))
 
 ;;;###autoload
 (defun org-onit-toggle-doing ()
@@ -482,46 +525,6 @@ STATE should be one of the symbols listed in the docstring of
     (org-onit--clock-in)
     (org-cycle-hide-drawers 'children)
     (org-reveal)))
-
-;;;###autoload
-(define-minor-mode org-onit-mode
-  "
-This minor mode expands `org-clock-in', `org-clock-out' and `org-clock-goto'
-to support \"Doing\" functionality. When you toggle a heading, a clock for
-the heading is automatically activated and the heading is tagged with
-`org-doing-tag'. Toggling the same heading, the clock is stopped, and the tag
-is removed. Basically, a single heading tagged with `org-doing-tag' will
-appear in org buffers.
-
-The tagged heading can be easily revisited by calling the extended
-`org-clock-goto' command whether you are editing another heading in any
-org buffers.
-
-An automated `org-clock-in' capability is also provided by this package.
-A heading that you are currently visiting in an org buffer will be
-automatically clocked with executing `org-clock-in'. After you switch to
-other headings, the active clock will be automatically updated without any
-additional actions.
-
-Recommended settings for `org-clock':
-  (setq org-clock-out-remove-zero-time-clocks t) ;; you should apply this.
-  (setq org-clock-clocked-in-display 'frame-title) ;; or 'both
-  (setq org-clock-frame-title-format
-    '((:eval (format \"%s\" org-mode-line-string))))
-
-Recommended keybindings:
-  (global-set-key (kbd \"C-<f11>\") 'org-clock-goto)
-  (define-key org-mode-map (kbd \"<f11>\") 'org-onit-toggle-doing)
-  (define-key org-mode-map (kbd \"M-<f11>\") 'org-onit-toggle-auto)
-  (define-key org-mode-map (kbd \"S-<f11>\") 'org-onit-goto-anchor)
-"
-  :init-value nil
-  :lighter (:eval (org-onit--lighter))
-  :require 'org-clock
-  :group 'org-onit
-  (if org-onit-mode
-      (org-onit--setup)
-    (org-onit--abort)))
 
 (provide 'org-onit)
 
