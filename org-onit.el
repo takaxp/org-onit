@@ -54,8 +54,7 @@
 ;;; Code:
 
 (require 'org-clock)
-(require 'bookmark nil t)
-(bookmark-maybe-load-default-file)
+(require 'bookmark)
 
 (defgroup org-onit nil
   "Commands to toggle `org-clock-in' and `org-clock-out'."
@@ -329,6 +328,9 @@ SELECT is the optional argument of `org-clock-goto'."
 
 (defun org-onit--setup ()
   "Setup."
+  ;; For bookmark.el
+  (bookmark-maybe-load-default-file)  
+  
   ;; For buffer-local
   (make-local-variable 'org-onit-basic-options)
 
