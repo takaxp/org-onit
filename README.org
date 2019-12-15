@@ -1,6 +1,8 @@
 #+title: org-onit.el
 #+startup: showall
 
+[[https://github.com/takaxp/org-onit/actions][https://github.com/takaxp/org-onit/workflows/Main%20workflow/badge.svg]]
+
 * Introduction
 
 This package provides automated ~org-clock-in~ and ~org-clock-out~ by adding ~Doing~ tag to a heading of an org mode buffer. While the ~Doing~ tag appears in an org buffer, Emacs Org mode maintains the task clocking.
