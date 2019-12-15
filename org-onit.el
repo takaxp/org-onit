@@ -290,7 +290,7 @@ SELECT is the optional argument of `org-clock-goto'."
       (org-onit--bookmark-jump org-onit-bookmark)) ;; call org-bookmark-jump
      (org-clock-history
       (apply f select)
-      (outline-show-children))
+      (org-show-children))
      (bm
       (org-onit--bookmark-jump org-onit-bookmark)) ;; use normal bookmark
      (t (message "No clock is found to be shown")))))
