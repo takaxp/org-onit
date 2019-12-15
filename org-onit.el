@@ -7,7 +7,7 @@
 ;; Version: 1.0.9
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; URL: https://github.com/takaxp/org-onit
-;; Package-Requires: ((emacs "25.1") (org "9.2.4"))
+;; Package-Requires: ((emacs "26.1") (org "9.2.4"))
 ;; Twitter: @takaxp
 
 ;; This program is free software: you can redistribute it and/or modify
