@@ -158,6 +158,47 @@ This flag is utilized for `org-onit-toggle-auto'."
   :group 'org-onit)
 (make-obsolete-variable 'org-onit-use-unfold-as-doing 'org-onit-basic-options "1.2.0")
 
+;;;###autoload
+(define-minor-mode org-onit-mode
+  "
+This minor mode expands `org-clock-in', `org-clock-out' and `org-clock-goto'
+to support \"Doing\" functionality. When you toggle a heading, a clock for
+the heading is automatically activated and the heading is tagged with
+`org-doing-tag'. Toggling the same heading, the clock is stopped, and the tag
+is removed. Basically, a single heading tagged with `org-doing-tag' will
+appear in org buffers.
+
+The tagged heading can be easily revisited by calling the extended
+`org-clock-goto' command whether you are editing another heading in any
+org buffers.
+
+An automated `org-clock-in' capability is also provided by this package.
+A heading that you are currently visiting in an org buffer will be
+automatically clocked with executing `org-clock-in'. After you switch to
+other headings, the active clock will be automatically updated without any
+additional actions.
+
+Recommended settings for `org-clock':
+  (setq org-clock-out-remove-zero-time-clocks t) ;; you should apply this.
+  (setq org-clock-clocked-in-display 'frame-title) ;; or 'both
+  (setq org-clock-frame-title-format
+    '((:eval (format \"%s\" org-mode-line-string))))
+
+Recommended keybindings:
+  (global-set-key (kbd \"C-<f11>\") 'org-clock-goto)
+  (define-key org-mode-map (kbd \"<f11>\") 'org-onit-toggle-doing)
+  (define-key org-mode-map (kbd \"M-<f11>\") 'org-onit-toggle-auto)
+  (define-key org-mode-map (kbd \"S-<f11>\") 'org-onit-goto-anchor)
+"
+  :init-value nil
+  :lighter (:eval (org-onit--lighter))
+  :require 'org-clock
+  :group 'org-onit
+  (if org-onit-mode
+      (org-onit--setup)
+    (org-onit--abort)))
+
+
 ;; internal functions
 
 (defun org-onit--rotate-list (list)
@@ -167,7 +208,6 @@ This flag is utilized for `org-onit-toggle-auto'."
               (list (car list)))
     list))
 
-(defvar org-onit-mode)
 (defvar org-onit--auto-clocking nil)
 (defvar org-onit--heading nil)
 (defvar org-onit--state nil)
@@ -485,46 +525,6 @@ STATE should be one of the symbols listed in the docstring of
     (org-onit--clock-in)
     (org-cycle-hide-drawers 'children)
     (org-reveal)))
-
-;;;###autoload
-(define-minor-mode org-onit-mode
-  "
-This minor mode expands `org-clock-in', `org-clock-out' and `org-clock-goto'
-to support \"Doing\" functionality. When you toggle a heading, a clock for
-the heading is automatically activated and the heading is tagged with
-`org-doing-tag'. Toggling the same heading, the clock is stopped, and the tag
-is removed. Basically, a single heading tagged with `org-doing-tag' will
-appear in org buffers.
-
-The tagged heading can be easily revisited by calling the extended
-`org-clock-goto' command whether you are editing another heading in any
-org buffers.
-
-An automated `org-clock-in' capability is also provided by this package.
-A heading that you are currently visiting in an org buffer will be
-automatically clocked with executing `org-clock-in'. After you switch to
-other headings, the active clock will be automatically updated without any
-additional actions.
-
-Recommended settings for `org-clock':
-  (setq org-clock-out-remove-zero-time-clocks t) ;; you should apply this.
-  (setq org-clock-clocked-in-display 'frame-title) ;; or 'both
-  (setq org-clock-frame-title-format
-    '((:eval (format \"%s\" org-mode-line-string))))
-
-Recommended keybindings:
-  (global-set-key (kbd \"C-<f11>\") 'org-clock-goto)
-  (define-key org-mode-map (kbd \"<f11>\") 'org-onit-toggle-doing)
-  (define-key org-mode-map (kbd \"M-<f11>\") 'org-onit-toggle-auto)
-  (define-key org-mode-map (kbd \"S-<f11>\") 'org-onit-goto-anchor)
-"
-  :init-value nil
-  :lighter (:eval (org-onit--lighter))
-  :require 'org-clock
-  :group 'org-onit
-  (if org-onit-mode
-      (org-onit--setup)
-    (org-onit--abort)))
 
 (provide 'org-onit)
 
